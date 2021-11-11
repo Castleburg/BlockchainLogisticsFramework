@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SawtoothClient", "SawtoothClient\SawtoothClient.csproj", "{D52337B4-98B6-413E-81D4-5914CF013E75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransactionProcessor", "TransactionProcessor\TransactionProcessor.csproj", "{715A21D7-52E4-4601-8F68-2A97C2826367}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManualTests", "ManualTests\ManualTests.csproj", "{8DBF00B1-1B2B-46C0-AC86-02B7C809DDD3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D52337B4-98B6-413E-81D4-5914CF013E75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D52337B4-98B6-413E-81D4-5914CF013E75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D52337B4-98B6-413E-81D4-5914CF013E75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D52337B4-98B6-413E-81D4-5914CF013E75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{715A21D7-52E4-4601-8F68-2A97C2826367}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{715A21D7-52E4-4601-8F68-2A97C2826367}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{715A21D7-52E4-4601-8F68-2A97C2826367}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{715A21D7-52E4-4601-8F68-2A97C2826367}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DBF00B1-1B2B-46C0-AC86-02B7C809DDD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DBF00B1-1B2B-46C0-AC86-02B7C809DDD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DBF00B1-1B2B-46C0-AC86-02B7C809DDD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DBF00B1-1B2B-46C0-AC86-02B7C809DDD3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {95B24CC2-2261-4DCD-AB42-42F21C768B7A}
+	EndGlobalSection
+EndGlobal
