@@ -12,20 +12,14 @@ namespace ManualTests
         {
             Console.WriteLine("Starting up!");
             var validatorAddress = "tcp://" + (args.Any() ? args.First() : "127.0.0.1:4004");
-            var clientAddress = "http://" + (args.Any() ? args.First() : "127.0.0.1:4004");
+            var clientAddress = "http://" + (args.Any() ? args.First() : "127.0.0.1:8008/batches");
 
-            var processorThread = Task.Run(() =>
-            {
-                var processor = new Processor(validatorAddress);
-                processor.Run();
-            });
+            var processor = new Processor(validatorAddress);
+            processor.Run();
 
-            var client = new Client(validatorAddress, "Transport1", "1.0");
+            var client = new Client(clientAddress, "Transport1", "1.0");
 
-            client.PostPayload("TestName", "set", "helloWorld");
-
-            Console.WriteLine("Waiting for processorThread to finish");
-            processorThread.Wait();
+            var result = client.PostPayload("TestName", "set", "helloWorld");
             Console.WriteLine("Done!");
         }
     }
