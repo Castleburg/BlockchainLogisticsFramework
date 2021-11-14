@@ -13,6 +13,16 @@ namespace TransactionProcessor.Handlers
 {
     internal class TransportHandler : ITransactionHandler
     {
+        public string FamilyName => "Transport1";
+        public string Version => "1.0";
+        public string[] Namespaces => new[] { FamilyName.ToByteArray().ToSha512().TakeLast(32).ToArray().ToHexString() };
+        readonly string _prefix;
+
+        public TransportHandler(string prefix)
+        {
+            _prefix = prefix;
+        }
+
         public async Task ApplyAsync(TpProcessRequest request, TransactionContext context)
         {
             var obj = CBORObject.DecodeFromBytes(request.Payload.ToByteArray());
@@ -31,10 +41,7 @@ namespace TransactionProcessor.Handlers
             }
         }
 
-        public string FamilyName => "Transport1";
-        public string Version => "1.0";
-
-        public string[] Namespaces => new[] {FamilyName.ToByteArray().ToSha512().TakeLast(32).ToArray().ToHexString()};
+        private string GetAddress(string name) => _prefix + name.ToByteArray().ToSha512().TakeLast(32).ToArray().ToHexString();
 
         private async Task SetLocation(string name, string value, TransactionContext context)
         {
