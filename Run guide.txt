@@ -1,0 +1,10 @@
+KØR docker fil: docker-compose -f sawtooth-default.yaml up
+
+Vi behøver ikke linux, men skal bare opdaterer kernel packagen.
+
+log into docker container: docker exec -it sawtooth-shell-default bash
+
+ curl http://rest-api:8008/blocks
+
+Address naming schematics:
+https://sawtooth.hyperledger.org/docs/core/releases/latest/app_developers_guide/address_and_namespace.html#simple-example-integerkey
