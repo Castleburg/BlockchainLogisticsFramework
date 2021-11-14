@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using SawtoothClient;
 using TransactionProcessor;
@@ -12,7 +11,8 @@ namespace ManualTests
         static void Main(string[] args)
         {
             Console.WriteLine("Starting up!");
-            var validatorAddress = args.Any() ? args.First() : "tcp://127.0.0.1:4004";
+            var validatorAddress = "tcp://" + (args.Any() ? args.First() : "127.0.0.1:4004");
+            var clientAddress = "http://" + (args.Any() ? args.First() : "127.0.0.1:4004");
 
             var processorThread = Task.Run(() =>
             {
@@ -22,7 +22,7 @@ namespace ManualTests
 
             var client = new Client(validatorAddress, "Transport1", "1.0");
 
-            client.PostPayload("TestName", "set", "");
+            client.PostPayload("TestName", "set", "helloWorld");
 
             Console.WriteLine("Waiting for processorThread to finish");
             processorThread.Wait();
