@@ -8,6 +8,7 @@ using Sawtooth.Sdk;
 using Sawtooth.Sdk.Processor;
 using Sawtooth.Sdk.Client;
 using Google.Protobuf;
+using System.Net.Http;
 
 namespace TransactionProcessor.Handlers
 {
@@ -41,11 +42,13 @@ namespace TransactionProcessor.Handlers
             }
         }
 
+        T[] Arrayify<T>(T obj) => new[] { obj };
+
         private string GetAddress(string name) => _prefix + name.ToByteArray().ToSha512().TakeLast(32).ToArray().ToHexString();
 
         private async Task SetLocation(string name, string value, TransactionContext context)
         {
-            //var state = await context.GetStateAsync(Arrayify(GetAddress(name)));
+            var state = await context.GetStateAsync(Arrayify(GetAddress(name)));
             Console.WriteLine($"TransportHandler SetLocation name:{name}, value:{value}");
             
         }
