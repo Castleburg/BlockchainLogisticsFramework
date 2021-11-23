@@ -9,17 +9,19 @@ using Sawtooth.Sdk.Processor;
 using Sawtooth.Sdk.Client;
 using Google.Protobuf;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
 
 namespace TransactionProcessor.Handlers
 {
-    internal class TransportHandler : ITransactionHandler
+    internal class GeneralistHandler : ITransactionHandler
     {
-        public string FamilyName => "Transport1";
+        public string FamilyName => "Generalist";
         public string Version => "1.0";
         public string[] Namespaces => new[] { FamilyName.ToByteArray().ToSha512().TakeLast(32).ToArray().ToHexString() };
         private string Prefix => FamilyName.ToByteArray().ToSha512().ToHexString().Substring(0, 6);
-        
-        public TransportHandler()
+
+        public GeneralistHandler()
         {
         }
 
@@ -27,32 +29,24 @@ namespace TransactionProcessor.Handlers
         {
             var obj = CBORObject.DecodeFromBytes(request.Payload.ToByteArray());
 
-            var name = obj["Name"].AsString();
-            var verb = obj["Verb"].AsString().ToLowerInvariant();
+            var name = obj["name"].AsString();
+            var json = obj["json"].AsString();
 
-            switch (verb)
+            try
             {
-                case "set":
-                    var value = obj["Value"].AsString();
-                    await SetLocation(name, value, context);
-                    break;
-                default:
-                    throw new InvalidTransactionException($"Unknown verb {verb}");
-            }
-        }
+                JsonConvert.DeserializeObject(json);
 
-        T[] Arrayify<T>(T obj) => new[] { obj };
+            }
+            catch (FormatException ex)
+            {
+                throw new InvalidTransactionException("Payload did not have a valid json format");
+            }
+            await context.SetStateAsync(new Dictionary<string, ByteString>
+            {
+                { GetAddress(name), ByteString.CopyFrom(json, Encoding.Unicode) }
+            });
+        }
 
         private string GetAddress(string name) => Prefix + name.ToByteArray().ToSha512().TakeLast(32).ToArray().ToHexString();
-
-        private async Task SetLocation(string name, string value, TransactionContext context)
-        {
-            var state = await context.GetStateAsync(Arrayify(GetAddress(name)));
-            Console.WriteLine($"TransportHandler SetLocation name:{name}, value:{value}");
-            
-        }
-
-
-
     }
 }
