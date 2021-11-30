@@ -6,10 +6,7 @@ using System.Threading.Tasks;
 using PeterO.Cbor;
 using Sawtooth.Sdk;
 using Sawtooth.Sdk.Processor;
-using Sawtooth.Sdk.Client;
 using Google.Protobuf;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using SharedObjects;
 
@@ -21,10 +18,6 @@ namespace TransactionProcessor.Handlers
         public string Version => "1.0";
         public string[] Namespaces => new[] { FamilyName.ToByteArray().ToSha512().TakeLast(32).ToArray().ToHexString() };
         private string Prefix => FamilyName.ToByteArray().ToSha512().ToHexString().Substring(0, 6);
-
-        public GeneralistHandler()
-        {
-        }
 
         public async Task ApplyAsync(TpProcessRequest request, TransactionContext context)
         {
@@ -76,7 +69,7 @@ namespace TransactionProcessor.Handlers
 
         private static GeneralistContainer Init()
         {
-            return new GeneralistContainer()
+            return new GeneralistContainer
             {
                 CreatedDate = DateTime.Now, 
                 ItemList = new Dictionary<string, JsonContainer>()
@@ -89,7 +82,7 @@ namespace TransactionProcessor.Handlers
                 throw new InvalidTransactionException($"Cannot add the item ({itemId}), as it already exists");
 
             var now = DateTime.Now;
-            var item = new JsonContainer()
+            var item = new JsonContainer
             {
                 AddedDate = now,
                 UpdatedDate = now
