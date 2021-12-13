@@ -34,12 +34,14 @@ namespace SawtoothClient
             _encoder = new Encoder(settings, signer.GetPrivateKey());
         }
 
-        public HttpResponseMessage PostPayload(string name, string verb, string value)
+        public HttpResponseMessage PostPayload(string name, string verb, string itemId, string type, string json)
         {
             var obj = CBORObject.NewMap()
-                .Add("Name", name)
-                .Add("Verb", verb)
-                .Add("Value", value);
+                .Add("name", name)
+                .Add("itemId", itemId)
+                .Add("verb", verb)
+                .Add("type", type)
+                .Add("json", json);
 
             var payload = _encoder.EncodeSingleTransaction(obj.EncodeToBytes());
             var content = new ByteArrayContent(payload);

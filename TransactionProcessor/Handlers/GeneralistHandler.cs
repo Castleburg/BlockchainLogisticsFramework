@@ -26,6 +26,7 @@ namespace TransactionProcessor.Handlers
             var name = obj["name"].AsString();
             var itemId = obj["itemId"].AsString();
             var verb = obj["verb"].AsString();
+            var type = obj["type"].AsString();
             var json = obj["json"].AsString();
             
             if(NotJson(json)) 
@@ -37,10 +38,10 @@ namespace TransactionProcessor.Handlers
 
             var value = verb switch
             {
-                "Init" => Init(),
-                "AddItem" => AddItem(UnpackByteString(state.First().Value), itemId, json),
-                "RemoveItem" => RemoveItem(UnpackByteString(state.First().Value), itemId),
-                "UpdateItem" => UpdateItem(UnpackByteString(state.First().Value), itemId, json),
+                "Init" => Init(type),
+                "Add" => AddItem(UnpackByteString(state.First().Value), itemId, json),
+                "Remove" => RemoveItem(UnpackByteString(state.First().Value), itemId),
+                "Update" => UpdateItem(UnpackByteString(state.First().Value), itemId, json),
                 _ => throw new InvalidTransactionException($"Unknown verb {verb}")
             };
             await SaveState(name, value, context);
@@ -67,10 +68,11 @@ namespace TransactionProcessor.Handlers
             return JsonConvert.DeserializeObject<GeneralistContainer>(byteStringJson.ToStringUtf8());
         }
 
-        private static GeneralistContainer Init()
+        private static GeneralistContainer Init(string type)
         {
             return new GeneralistContainer
             {
+                Type = type,
                 CreatedDate = DateTime.Now, 
                 ItemList = new Dictionary<string, JsonContainer>()
             };
