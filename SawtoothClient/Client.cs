@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net.Http;
+﻿using System.Net.Http;
 using PeterO.Cbor;
 using Sawtooth.Sdk;
 using Sawtooth.Sdk.Client;

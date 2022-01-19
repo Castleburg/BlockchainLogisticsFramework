@@ -48,8 +48,17 @@ namespace TransactionProcessor.Handlers
         private async Task SetLocation(string name, string value, TransactionContext context)
         {
             var state = await context.GetStateAsync(Arrayify(GetAddress(name)));
-            Console.WriteLine($"TransportHandler SetLocation name:{name}, value:{value}");
             
+
+
+
+
+
+
+
+
+
+
         }
 
 
