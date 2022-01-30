@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Sawtooth.Sdk;
 using TransactionProcessor.Handlers;
 
 namespace TransactionProcessor
@@ -20,7 +17,7 @@ namespace TransactionProcessor
         public void Run()
         {
             var processor = new Sawtooth.Sdk.Processor.TransactionProcessor(_validatorAddress);
-            processor.AddHandler(new TransportHandler());
+            processor.AddHandler(new GeneralistHandler());
             processor.Start();
 
             Console.CancelKeyPress += delegate { processor.Stop(); };

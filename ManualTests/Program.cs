@@ -27,7 +27,7 @@ namespace ManualTests
                 Time = DateTime.Today
             };
 
-            var result = client.PostPayload("BorgTest", "Init", "Item1", "", JsonConvert.SerializeObject(container));
+            var result = client.PostPayload("BorgTest3", "Init", "Item1", "", JsonConvert.SerializeObject(container));
             Console.WriteLine("Done!");
         }
     }

@@ -21,6 +21,7 @@ namespace TransactionProcessor.Handlers
 
         public async Task ApplyAsync(TpProcessRequest request, TransactionContext context)
         {
+            Console.WriteLine("Processor Starting up!");
             var obj = CBORObject.DecodeFromBytes(request.Payload.ToByteArray());
 
             var name = obj["name"].AsString();
