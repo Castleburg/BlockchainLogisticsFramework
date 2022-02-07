@@ -6,7 +6,7 @@ namespace SharedObjects.Logistic
 {
     public class SignOff
     {
-        public List<string> Invites { get; set; }
+        public List<Invite> Invites { get; set; }
         public List<Operator> Signatories { get; set; }
     }
 }
