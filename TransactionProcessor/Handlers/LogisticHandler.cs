@@ -70,9 +70,9 @@ namespace TransactionProcessor.Handlers
                 return true;
             }
         }
-        private static Container UnpackByteString(ByteString byteStringJson)
+        private static Entity UnpackByteString(ByteString byteStringJson)
         {
-            return JsonConvert.DeserializeObject<Container>(byteStringJson.ToStringUtf8());
+            return JsonConvert.DeserializeObject<Entity>(byteStringJson.ToStringUtf8());
         }
 
         private void HandleRequest(Command command, string json, TransactionContext context)
@@ -102,10 +102,10 @@ namespace TransactionProcessor.Handlers
         private async void CreateContainer(Command command, Operator op, TransactionContext context)
         {
             var now = DateTime.Now;
-            var container = new Container()
+            var container = new Entity()
             {
                 CreatedBy = op.PublicKey,
-                Entities = new List<Entity>(),
+                Entities = new List<SharedObjects.Logistic.Event>(),
                 Operators = new List<Operator>() { op },
                 CreatedDate = now,
                 LastModified = now
@@ -125,11 +125,11 @@ namespace TransactionProcessor.Handlers
             await SaveState(command.TransactionId, container, context);
         }
 
-        private async void AddEntity(Command command, CommandContainer commandContainer, TransactionContext context)
+        private async void AddEntity(Command command, SharedObjects.Logistic.Event entity, TransactionContext context)
         {
             var state = GetState(command.TransactionId, context);
             var container = UnpackByteString(state.First().Value);
-            var entity = new Entity()
+            var entity = new SharedObjects.Logistic.Event()
             {
                 CreatedByOperatorName = commandContainer.OperatorName,
                 JsonString = commandContainer.Command.JsonEntity,
@@ -139,7 +139,7 @@ namespace TransactionProcessor.Handlers
             await SaveState(command.TransactionId, container, context);
         }
 
-        private async Task SaveState(Guid transactionId, Container value, TransactionContext context)
+        private async Task SaveState(Guid transactionId, Entity value, TransactionContext context)
         {
             var jsonValue = JsonConvert.SerializeObject(value);
             var t = await context.SetStateAsync(new Dictionary<string, ByteString>
