@@ -11,7 +11,7 @@ namespace SharedObjects.Logistic
         public string CreatorId { get; set; } //PublicKey
         public List<Event> Events { get; set; }
         public SignOff SignOff { get; set; }
-        public bool Completed { get; set; }
+        public bool Final { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime LastModified { get; set; }
     }

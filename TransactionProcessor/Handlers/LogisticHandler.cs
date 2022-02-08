@@ -25,9 +25,9 @@ namespace TransactionProcessor.Handlers
         public string[] Namespaces => new[] { FamilyName.ToByteArray().ToSha512().TakeLast(32).ToArray().ToHexString() };
         private string Prefix => FamilyName.ToByteArray().ToSha512().ToHexString().Substring(0, 6);
 
-        private readonly string _entityNotCreatedMessage =
-            $"No address related to that TransactionId. Use the \"{LogisticEnums.Commands.NewEntity}\" ActionType to create a new one.";
-        private readonly string _commandNullMessage = $"Command was null.";
+        private readonly string _entityNotCreatedMessage = $"No address related to that TransactionId. Use the \"{LogisticEnums.Commands.NewEntity}\" ActionType to create a new one.";
+        private readonly string _commandNullMessage = "Command was null.";
+        private readonly string _entityFinalMessage = "Entity is final and can no longer be changed.";
 
         public LogisticHandler()
         {
@@ -38,13 +38,14 @@ namespace TransactionProcessor.Handlers
             var obj = CBORObject.DecodeFromBytes(request.Payload.ToByteArray());
             var command = obj["command"].ToObject<Command>();
 
+            //TODO Check Digital Signature
+
             HandleRequest(command, context);
         }
 
         //T[] Arrayify<T>(T obj) => new[] { obj };
         private Dictionary<string, ByteString> GetState(Guid transactionId, TransactionContext context) => context.GetStateAsync(new[] { GetAddress(transactionId) }).Result;
         private string GetAddress(Guid transactionId) => Prefix + transactionId.ToByteArray().ToSha512().TakeLast(32).ToArray().ToHexString();
-        private static bool AlreadyInitialized(LogisticEnums.Commands type, Dictionary<string, ByteString> state) => (type == LogisticEnums.Commands.NewEntity) && state.Any();
         private static Entity UnpackByteString(ByteString byteStringJson)
         {
             return JsonConvert.DeserializeObject<Entity>(byteStringJson.ToStringUtf8());
@@ -58,6 +59,10 @@ namespace TransactionProcessor.Handlers
                     NewEntity(command, context);
                     break;
                 case LogisticEnums.Commands.AddEvent:
+                    AddEvent(command, context);
+                    break;
+                case LogisticEnums.Commands.MakeFinal:
+                    MakeFinal(command, context);
                     break;
 
                 case LogisticEnums.Commands.Invite:
@@ -66,8 +71,7 @@ namespace TransactionProcessor.Handlers
                     break;
                 case LogisticEnums.Commands.RejectInvite:
                     break;
-
-                case LogisticEnums.Commands.Sign:
+                case LogisticEnums.Commands.AcceptInvite:
                     break;
 
                 default:
@@ -78,7 +82,7 @@ namespace TransactionProcessor.Handlers
         private async void NewEntity(Command command, TransactionContext context)
         {
             var state = GetState(command.TransactionId, context);
-            if (AlreadyInitialized(command.Type, state))
+            if (state.Any())
                 throw new InvalidTransactionException("Address already in use.");
 
             var newEntity = JsonConvert.DeserializeObject<NewEntity>(command.JsonContainer);
@@ -97,12 +101,83 @@ namespace TransactionProcessor.Handlers
                     Invites = new List<Invite>(),
                     Signatories = new List<Operator>()
                 },
-                Completed = false,
+                Final = false,
                 CreatedDate = now,
                 LastModified = now
             };
             await SaveState(command.TransactionId, entity, context);
         }
+
+        private async void AddEvent(Command command, TransactionContext context)
+        {
+            var state = GetState(command.TransactionId, context);
+            if(!state.Any())
+                throw new InvalidTransactionException(_entityNotCreatedMessage);
+
+            var addEvent = JsonConvert.DeserializeObject<AddEvent>(command.JsonContainer);
+            if (addEvent is null)
+                throw new InvalidTransactionException(_commandNullMessage);
+
+            var entity = UnpackByteString(state.First().Value);
+            if (entity.Final)
+                throw new InvalidTransactionException("Entity is final and can no longer be changed.");
+
+            var newEvent = new SharedObjects.Logistic.Event()
+            {
+                Type = addEvent.Type,
+                JsonContainer = addEvent.JsonContainer,
+                TimeStamp = DateTime.Now
+            };
+
+            //Check contents of JsonContainer based on Type
+
+
+
+            entity.Events.Add(newEvent);
+            await SaveState(command.TransactionId, entity, context);
+        }
+
+        private async void MakeFinal(Command command, TransactionContext context)
+        {
+            var state = GetState(command.TransactionId, context);
+            if (!state.Any())
+                throw new InvalidTransactionException(_entityNotCreatedMessage);
+
+            //TODO
+            var addEvent = JsonConvert.DeserializeObject<AddEvent>(command.JsonContainer);
+            if (addEvent is null)
+                throw new InvalidTransactionException(_commandNullMessage);
+
+            var entity = UnpackByteString(state.First().Value);
+            if (entity.Final)
+                throw new InvalidTransactionException(_entityFinalMessage);
+
+            //Check if Entity is valid to be made final
+
+            await SaveState(command.TransactionId, entity, context);
+        }
+
+
+        private async void Invite(Command command, TransactionContext context)
+        {
+            var state = GetState(command.TransactionId, context);
+            if (!state.Any())
+                throw new InvalidTransactionException(_entityNotCreatedMessage);
+
+            //TODO
+            var addEvent = JsonConvert.DeserializeObject<AddEvent>(command.JsonContainer);
+            if (addEvent is null)
+                throw new InvalidTransactionException(_commandNullMessage);
+
+            var entity = UnpackByteString(state.First().Value);
+            if (!entity.Final)
+                throw new InvalidTransactionException(_entityFinalMessage);
+
+            //Check if invite has already been sent
+
+            await SaveState(command.TransactionId, entity, context);
+        }
+
 
         //private async void AddOperator(Command command, Operator op, TransactionContext context)
         //{
@@ -116,7 +191,7 @@ namespace TransactionProcessor.Handlers
         //    await SaveState(command.TransactionId, container, context);
         //}
 
-        
+
 
         private async Task SaveState(Guid transactionId, Entity value, TransactionContext context)
         {

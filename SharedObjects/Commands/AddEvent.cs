@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using SharedObjects.Enums;
 
-namespace SharedObjects.Logistic
+namespace SharedObjects.Commands
 {
-    public class Event
+    public class AddEvent
     {
         public LogisticEnums.EventType Type { get; set; }
         public string JsonContainer { get; set; }
-        public DateTime TimeStamp { get; set; }
     }
 }
