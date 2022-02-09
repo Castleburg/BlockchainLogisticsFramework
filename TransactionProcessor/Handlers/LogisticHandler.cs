@@ -6,17 +6,13 @@ using System.Threading.Tasks;
 using PeterO.Cbor;
 using Sawtooth.Sdk;
 using Sawtooth.Sdk.Processor;
-using Sawtooth.Sdk.Client;
 using Google.Protobuf;
-using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using Newtonsoft.Json;
-using SharedObjects;
 using SharedObjects.Commands;
 using SharedObjects.Enums;
 using SharedObjects.Logistic;
-using TransactionProcessor.Process;
 using TransactionProcessor.Process.Interfaces;
+using TransactionProcessor.Tools.Interfaces;
 
 namespace TransactionProcessor.Handlers
 {
@@ -27,23 +23,26 @@ namespace TransactionProcessor.Handlers
         public string[] Namespaces => new[] { FamilyName.ToByteArray().ToSha512().TakeLast(32).ToArray().ToHexString() };
         private string Prefix => FamilyName.ToByteArray().ToSha512().ToHexString().Substring(0, 6);
 
-        private readonly ILogisticProcess _logisticProcess;
+        private readonly ILogisticProcessor _logisticProcess;
+        private readonly ICryptographicService _cryptographicService;
 
-        public LogisticHandler(string familyName, string version, ILogisticProcess logisticProcess)
+        public LogisticHandler(string familyName, string version, ILogisticProcessor logisticProcess, ICryptographicService cryptographicService)
         {
             FamilyName = familyName;
             Version = version;
             _logisticProcess = logisticProcess;
+            _cryptographicService = cryptographicService;
         }
 
         public async Task ApplyAsync(TpProcessRequest request, TransactionContext context)
         {
             var obj = CBORObject.DecodeFromBytes(request.Payload.ToByteArray());
-            var command = obj["command"].ToObject<Command>();
+            var token = obj["token"].ToObject<CommandToken>();
 
-            //TODO Check Digital Signature
+            if (!_cryptographicService.VerifySignature(token))
+                throw new InvalidTransactionException($"Digital Signature was invalid");
 
-            await HandleRequest(command, context);
+            await HandleRequest(token.Command, context);
         }
 
         private async Task HandleRequest(Command command, TransactionContext context)
@@ -61,15 +60,16 @@ namespace TransactionProcessor.Handlers
 
                 _ => throw new InvalidTransactionException($"Unknown ActionType {command.Type}")
             };
-            await SaveState(command.TransactionId, entity, context);
+            //TODO: Check response
+            var response = await SaveState(command.TransactionId, entity, context);
         }
 
         private string GetAddress(Guid transactionId) => Prefix + transactionId.ToByteArray().ToSha512().TakeLast(32).ToArray().ToHexString();
 
-        private async Task SaveState(Guid transactionId, Entity value, TransactionContext context)
+        private Task<string[]> SaveState(Guid transactionId, Entity value, TransactionContext context)
         {
             var jsonValue = JsonConvert.SerializeObject(value);
-            var t = await context.SetStateAsync(new Dictionary<string, ByteString>
+            return context.SetStateAsync(new Dictionary<string, ByteString>
             {
                 { GetAddress(transactionId), ByteString.CopyFrom(jsonValue, Encoding.UTF8) }
             });

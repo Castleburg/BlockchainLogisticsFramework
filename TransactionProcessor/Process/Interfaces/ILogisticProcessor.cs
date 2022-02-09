@@ -4,7 +4,7 @@ using SharedObjects.Logistic;
 
 namespace TransactionProcessor.Process.Interfaces
 {
-    internal interface ILogisticProcess
+    internal interface ILogisticProcessor
     {
         Entity NewEntity(Command command, TransactionContext context);
         Entity AddEvent(Command command, TransactionContext context);

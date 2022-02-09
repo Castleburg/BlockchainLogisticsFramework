@@ -12,7 +12,7 @@ using TransactionProcessor.Process.Interfaces;
 
 namespace TransactionProcessor.Process
 {
-    internal class LogisticProcess : ILogisticProcess
+    internal class LogisticProcessor : ILogisticProcessor
     {
         private readonly string _familyName;
         private string Prefix => _familyName.ToByteArray().ToSha512().ToHexString().Substring(0, 6);
@@ -21,12 +21,11 @@ namespace TransactionProcessor.Process
         private readonly string _commandNullMessage = "Command was null.";
         private readonly string _entityFinalMessage = "Entity is final and can no longer be changed.";
 
-        public LogisticProcess(string familyName)
+        public LogisticProcessor(string familyName)
         {
             _familyName = familyName;
         }
 
-        
         public Entity NewEntity(Command command, TransactionContext context)
         {
             var state = GetState(command.TransactionId, context);
@@ -47,7 +46,7 @@ namespace TransactionProcessor.Process
                 SignOff = new SignOff()
                 {
                     Invites = new List<Invite>(),
-                    Signatories = new List<Operator>()
+                    Signatories = new List<Signatory>()
                 },
                 Final = false,
                 CreatedDate = now,
