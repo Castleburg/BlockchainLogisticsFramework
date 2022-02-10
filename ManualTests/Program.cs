@@ -16,30 +16,6 @@ namespace ManualTests
     {
         private static void Main(string[] args)
         {
-            var decrypt = new RsaDecryptionService();
-            var encrypt = new RsaEncryptionService();
-
-
-
-            //var rsa = RSA.Create();
-            //var t = rsa.ExportRSAPublicKey();
-            //var stringy = System.Text.Encoding.UTF8.GetString(t);
-
-            var rsa1 = new RSACryptoServiceProvider();
-            var rsaParameters = rsa1.ExportParameters(true);
-
-            var command = new Command()
-            {
-                CommandType = LogisticEnums.Commands.NewEntity,
-                TransactionId = Guid.NewGuid(),
-                JsonContainer = "HelloWorld",
-                TimeStamp = DateTime.Now
-            };
-            var token = encrypt.SignCommand(command, rsaParameters, "SHA256");
-            if(decrypt.VerifySignature(token))
-                Console.WriteLine("Hurray!");
-
-
 
             Console.WriteLine("Starting up!");
             var validatorAddress = "tcp://" + (args.Any() ? args.First() : "192.168.0.106:4004");
@@ -48,16 +24,26 @@ namespace ManualTests
             var processor = new Processor(validatorAddress);
             processor.Run();
 
-            var client = new Client(clientAddress, "Generalist", "1.0");
+            var client = new Client(clientAddress, "Test", "1.0");
 
-            var container = new TestContainer()
+            var newEntity = new NewEntity()
             {
-                Name = "Item1",
-                Numbers = new List<int>{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-                Time = DateTime.Today
+                CreatorId = "HelloWorld"
+            };
+            var command = new Command()
+            {
+                CommandType = LogisticEnums.Commands.NewEntity,
+                JsonContainer = JsonConvert.SerializeObject(newEntity),
+                TimeStamp = DateTime.Now,
+                TransactionId = Guid.NewGuid()
             };
 
-            var result = client.PostPayload("BorgTest3", "Init", "Item1", "", JsonConvert.SerializeObject(container));
+            var result = client.PostPayload(JsonConvert.SerializeObject(command));
+
+
+
+
+
             Console.WriteLine("Done!");
         }
     }

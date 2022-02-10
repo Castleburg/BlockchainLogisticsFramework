@@ -37,7 +37,7 @@ namespace TransactionProcessor.Handlers
         public async Task ApplyAsync(TpProcessRequest request, TransactionContext context)
         {
             var obj = CBORObject.DecodeFromBytes(request.Payload.ToByteArray());
-            var token = obj["token"].ToObject<CommandToken>();
+            var token = obj["command"].ToObject<CommandToken>();
 
             if (!_cryptographicService.VerifySignature(token))
                 throw new InvalidTransactionException($"Digital Signature was invalid");

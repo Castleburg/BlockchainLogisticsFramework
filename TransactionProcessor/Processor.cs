@@ -1,5 +1,7 @@
 ﻿using System;
 using TransactionProcessor.Handlers;
+using TransactionProcessor.Process;
+using TransactionProcessor.Tools;
 
 namespace TransactionProcessor
 {
@@ -16,8 +18,11 @@ namespace TransactionProcessor
 
         public void Run()
         {
+            var logisticProcess = new LogisticProcessor("Test");
+            var cryptoService = new RsaDecryptionService();
+
             var processor = new Sawtooth.Sdk.Processor.TransactionProcessor(_validatorAddress);
-            processor.AddHandler(new GeneralistHandler());
+            processor.AddHandler(new LogisticHandler("Test", "1.0", logisticProcess, cryptoService));
             processor.Start();
 
             Console.CancelKeyPress += delegate { processor.Stop(); };
