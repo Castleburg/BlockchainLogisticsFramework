@@ -21,8 +21,8 @@ namespace ManualTests
             var validatorAddress = "tcp://" + (args.Any() ? args.First() : "192.168.0.106:4004");
             var clientAddress = "http://" + (args.Any() ? args.First() : "192.168.0.106:8008/batches");
 
-            var processor = new Processor(validatorAddress);
-            processor.Run();
+            //var processor = new Processor(validatorAddress);
+            //processor.Run();
 
             var client = new Client(clientAddress, "Test", "1.0");
 
@@ -38,11 +38,13 @@ namespace ManualTests
                 TransactionId = Guid.NewGuid()
             };
 
-            var result = client.PostPayload(JsonConvert.SerializeObject(command));
+            var rsa = RSA.Create();
+            var param = rsa.ExportParameters(true);
 
+            var signer = new RsaEncryptionService();
+            var commandToken = signer.SignCommand(command, param, "SHA256");
 
-
-
+            var result = client.PostPayload(JsonConvert.SerializeObject(commandToken));
 
             Console.WriteLine("Done!");
         }
