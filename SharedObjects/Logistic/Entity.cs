@@ -8,7 +8,8 @@ namespace SharedObjects.Logistic
     {
         public LogisticEnums.EntityType Type { get; set; }
         public Guid TransactionId { get; set; }
-        public string CreatorId { get; set; } //PublicKey
+        public string CreatorId { get; set; }
+        public byte[] PublicKey { get; set; }
         public List<Event> Events { get; set; }
         public SignOff SignOff { get; set; }
         public bool Final { get; set; }

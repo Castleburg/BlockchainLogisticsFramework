@@ -47,7 +47,7 @@ namespace TransactionProcessor.Handlers
 
         private async Task HandleRequest(Command command, TransactionContext context)
         {
-            var entity = command.Type switch
+            var entity = command.CommandType switch
             {
                 LogisticEnums.Commands.NewEntity    => _logisticProcess.NewEntity(command, context),
                 LogisticEnums.Commands.AddEvent     => _logisticProcess.AddEvent(command, context),
@@ -58,7 +58,7 @@ namespace TransactionProcessor.Handlers
                 LogisticEnums.Commands.RejectInvite => _logisticProcess.RejectInvite(command, context),
                 LogisticEnums.Commands.AcceptInvite => _logisticProcess.AcceptInvite(command, context),
 
-                _ => throw new InvalidTransactionException($"Unknown ActionType {command.Type}")
+                _ => throw new InvalidTransactionException($"Unknown ActionType {command.CommandType}")
             };
             //TODO: Check response
             var response = await SaveState(command.TransactionId, entity, context);

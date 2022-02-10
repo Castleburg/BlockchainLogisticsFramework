@@ -40,7 +40,7 @@ namespace TransactionProcessor.Process
             var entity = new Entity()
             {
                 Type = newEntity.Type,
-                CreatorId = command.PublicKey,
+                PublicKey = command.PublicKey,
                 TransactionId = command.TransactionId,
                 Events = new List<SharedObjects.Logistic.Event>(),
                 SignOff = new SignOff()

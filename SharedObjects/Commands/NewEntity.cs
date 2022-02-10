@@ -8,5 +8,6 @@ namespace SharedObjects.Commands
     public class NewEntity
     {
         public LogisticEnums.EntityType Type { get; set; }
+        public string CreatorId { get; set; }
     }
 }
