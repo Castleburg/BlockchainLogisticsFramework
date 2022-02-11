@@ -10,7 +10,7 @@ namespace SharedObjects.Logistic
         public Guid TransactionId { get; set; }
         public string CreatorId { get; set; }
         public byte[] PublicKey { get; set; }
-        public List<Event> Events { get; set; }
+        public List<CustomEvent> Events { get; set; }
         public SignOff SignOff { get; set; }
         public bool Final { get; set; }
         public DateTime CreatedDate { get; set; }

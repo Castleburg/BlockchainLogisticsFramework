@@ -10,7 +10,7 @@ namespace SharedObjects.Enums
         public enum InviteStatus { Pending, Cancelled, Rejected, Signed }
         public enum EntityType { RideShare }
 
-        public enum EventType {  }
+        public enum EventType { StartRide, AddPassenger, RemovePassenger, StopRide, CancelRide, UpdateRide}
 
     }
 }

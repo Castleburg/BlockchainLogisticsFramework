@@ -6,8 +6,9 @@ namespace TransactionProcessor.Process.Interfaces
 {
     internal interface IBusinessProcess
     {
-        Event AddEvent(Command command);
-        bool MakeFinal(Command command);
-        string AcceptInvite(Command command);
+        CustomEvent AddEvent(AddEvent newEvent, Entity entity);
+        bool MakeFinal(AddEvent newEvent, Entity entity);
+        string AcceptInvite(AddEvent newEvent, Entity entity);
+
     }
 }
