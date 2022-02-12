@@ -6,9 +6,7 @@ namespace SharedObjects.Commands
 {
     public class NewInvite
     {
-
-
-
+        public byte[] InvitedPublicKey { get; set; }
 
 
 

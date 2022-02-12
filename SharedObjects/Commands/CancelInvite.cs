@@ -6,6 +6,6 @@ namespace SharedObjects.Commands
 {
     public class CancelInvite
     {
-
+        public byte[] InvitedPublicKey { get; set; }
     }
 }
