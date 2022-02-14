@@ -42,7 +42,7 @@ namespace TransactionProcessor.Process
                 Type = newEntity.Type,
                 PublicKey = command.PublicKey,
                 TransactionId = command.TransactionId,
-                Events = new List<SharedObjects.Logistic.Event>(),
+                Events = new List<SharedObjects.Logistic.CustomEvent>(),
                 SignOff = new SignOff()
                 {
                     Invites = new List<Invite>(),
@@ -69,7 +69,7 @@ namespace TransactionProcessor.Process
             if (entity.Final)
                 throw new InvalidTransactionException("Entity is final and can no longer be changed.");
 
-            var newEvent = new SharedObjects.Logistic.Event()
+            var newEvent = new SharedObjects.Logistic.CustomEvent()
             {
                 Type = addEvent.Type,
                 JsonContainer = addEvent.JsonContainer,
