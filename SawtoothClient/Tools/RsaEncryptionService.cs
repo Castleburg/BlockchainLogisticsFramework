@@ -10,7 +10,7 @@ namespace SawtoothClient.Tools
 {
     public class RsaEncryptionService
     {
-        public CommandToken SignCommand(Command command, RSAParameters privateRsaParameters, string hashAlgorithm)
+        public Token SignCommand(Command command, RSAParameters privateRsaParameters, string hashAlgorithm)
         {
 
             var rsa = RSA.Create();
@@ -40,7 +40,7 @@ namespace SawtoothClient.Tools
                 SignedHashedCommand = signedBytes,
                 HashedCommand = bytes
             };
-            return new CommandToken()
+            return new Token()
             {
                 Command = command,
                 RsaParameters = publicRsaParameters,

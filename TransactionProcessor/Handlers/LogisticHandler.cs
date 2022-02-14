@@ -41,10 +41,21 @@ namespace TransactionProcessor.Handlers
 
             var bytes = request.Payload.ToByteArray();
             var stringPayload = Encoding.UTF8.GetString(bytes);
-            var token = JsonConvert.DeserializeObject<CommandToken>(stringPayload);
+            Token token = null;
+            try
+            {
+                token = JsonConvert.DeserializeObject<Token>(stringPayload);
+            }
+            catch
+            {
+                throw new InvalidTransactionException($"Could not unpack Token.");
+            }
+            
+            if(token is null)
+                throw new InvalidTransactionException($"Token was null.");
 
             if (!_cryptographicService.VerifySignature(token))
-                throw new InvalidTransactionException($"Digital Signature was invalid");
+                throw new InvalidTransactionException($"Digital Signature was invalid.");
 
             await HandleRequest(token.Command, context);
         }
@@ -62,7 +73,7 @@ namespace TransactionProcessor.Handlers
                 LogisticEnums.Commands.RejectInvite => _logisticProcess.RejectInvite(command, context),
                 LogisticEnums.Commands.AcceptInvite => _logisticProcess.AcceptInvite(command, context),
 
-                _ => throw new InvalidTransactionException($"Unknown ActionType {command.CommandType}")
+                _ => throw new InvalidTransactionException($"Unknown ActionType {command.CommandType}.")
             };
             //TODO: Check response
             var response = await SaveState(command.TransactionId, entity, context);

@@ -7,9 +7,9 @@ namespace SharedObjects.Logistic
 {
     public class Invite
     {
-        public string PublicKey { get; set; }
+        public byte[] PublicKey { get; set; }
         public DateTime CreatedDate { get; set; }
-        public string InviteStatus { get; set; }
+        public LogisticEnums.InviteStatus InviteStatus { get; set; }
         public DateTime LastUpdated { get; set; }
     }
 }

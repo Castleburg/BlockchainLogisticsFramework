@@ -7,7 +7,7 @@ using SharedObjects.Logistic;
 namespace SharedObjects.Commands
 {
     [Serializable]
-    public class CommandToken
+    public class Token
     {
         public Command Command { get; set; }
         public Signature Signature { get; set; }

@@ -35,9 +35,6 @@ namespace SawtoothClient
 
         public HttpResponseMessage PostPayload(string json)
         {
-            //var obj = CBORObject.NewMap()
-            //    .Add("command", json);
-
             var payload = _encoder.EncodeSingleTransaction(json.ToByteArray());
             var content = new ByteArrayContent(payload);
             content.Headers.Add("Content-Type", "application/octet-stream");
