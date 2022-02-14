@@ -6,11 +6,11 @@ namespace SharedObjects.Enums
 {
     public class LogisticEnums
     {
-        public enum Commands { NewEntity, AddEvent, MakeFinal, NewInvite, CancelInvite, RejectInvite, AcceptInvite }
-        public enum InviteStatus { Pending, Cancelled, Rejected, Signed }
-        public enum EntityType { RideShare }
+        public enum Commands { Undefined, NewEntity, AddEvent, MakeFinal, NewInvite, CancelInvite, RejectInvite, AcceptInvite }
+        public enum InviteStatus { Undefined, Pending, Cancelled, Rejected, Signed }
+        public enum EntityType { Undefined, RideShare }
 
-        public enum EventType {  }
+        public enum EventType { Undefined }
 
     }
 }

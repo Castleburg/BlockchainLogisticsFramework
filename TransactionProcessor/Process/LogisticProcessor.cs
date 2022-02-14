@@ -18,8 +18,9 @@ namespace TransactionProcessor.Process
         private readonly string _familyName;
         private string Prefix => _familyName.ToByteArray().ToSha512().ToHexString().Substring(0, 6);
 
+        private readonly IBusinessProcess _businessProcess;
+
         private readonly string _entityNotCreatedMessage = $"No address related to that TransactionId. Use the \"{LogisticEnums.Commands.NewEntity}\" ActionType to create a new one.";
-        private readonly string _commandNullMessage = "Command was null.";
         private readonly string _entityFinalMessage = "Entity is final and can no longer be changed.";
         private readonly string _entityNotFinalMessage = "Entity has not yet been made final.";
         private readonly string _inviteAlreadyExists = "Cannot invite the same signatory more than once.";
@@ -28,9 +29,10 @@ namespace TransactionProcessor.Process
         private readonly string _inviteNotPending = "Invite is not pending.";
 
 
-        public LogisticProcessor(string familyName)
+        public LogisticProcessor(string familyName, IBusinessProcess businessProcess)
         {
             _familyName = familyName;
+            _businessProcess = businessProcess;
         }
 
         public Entity NewEntity(Command command, TransactionContext context)
@@ -39,14 +41,13 @@ namespace TransactionProcessor.Process
             if (state.Any())
                 throw new InvalidTransactionException("Address already in use.");
 
-            var newEntity = JsonConvert.DeserializeObject<NewEntity>(command.JsonContainer);
-            if (newEntity is null)
-                throw new InvalidTransactionException(_commandNullMessage);
+            if (command.Info.EntityType == LogisticEnums.EntityType.Undefined)
+                throw new InvalidTransactionException("EntityType is undefined.");
 
             var now = DateTime.Now;
             var entity = new Entity()
             {
-                Type = newEntity.Type,
+                Type = command.Info.EntityType,
                 PublicKey = command.PublicKey,
                 TransactionId = command.TransactionId,
                 Events = new List<SharedObjects.Logistic.Event>(),
@@ -68,9 +69,8 @@ namespace TransactionProcessor.Process
             if (!state.Any())
                 throw new InvalidTransactionException(_entityNotCreatedMessage);
 
-            var addEvent = JsonConvert.DeserializeObject<AddEvent>(command.JsonContainer);
-            if (addEvent is null)
-                throw new InvalidTransactionException(_commandNullMessage);
+            if (command.Info.EventType == LogisticEnums.EventType.Undefined)
+                throw new InvalidTransactionException("EventType is undefined.");
 
             var entity = UnpackByteString(state.First().Value);
 
@@ -80,18 +80,14 @@ namespace TransactionProcessor.Process
             if (entity.Final)
                 throw new InvalidTransactionException(_entityFinalMessage);
 
-            var newEvent = new SharedObjects.Logistic.Event()
-            {
-                Type = addEvent.Type,
-                JsonContainer = addEvent.JsonContainer,
-                TimeStamp = DateTime.Now
-            };
-
-            //Check contents of JsonContainer based on Type
+            var eventsCopy = entity.Events.ConvertAll(e =>
+                new SharedObjects.Logistic.Event(e.Type, e.JsonContainer, e.TimeStamp));
+            
 
 
 
-            entity.Events.Add(newEvent);
+
+            //entity.Events.Add(newEvent);
             return entity;
         }
 
@@ -120,21 +116,20 @@ namespace TransactionProcessor.Process
             if (!state.Any())
                 throw new InvalidTransactionException(_entityNotCreatedMessage);
 
-            var newInvite = JsonConvert.DeserializeObject<NewInvite>(command.JsonContainer);
-            if (newInvite is null)
-                throw new InvalidTransactionException(_commandNullMessage);
+            if (command.Info.InvitePublicKey is null)
+                throw new InvalidTransactionException("Missing invited public key.");
 
             var entity = UnpackByteString(state.First().Value);
             if (!entity.Final)
                 throw new InvalidTransactionException(_entityNotFinalMessage);
 
-            if(InviteExists(entity, newInvite.InvitedPublicKey))
+            if(InviteExists(entity, command.Info.InvitePublicKey))
                 throw new InvalidTransactionException(_inviteAlreadyExists);
 
             var now = DateTime.Now;
             var invite = new Invite()
             {
-                PublicKey = newInvite.InvitedPublicKey,
+                PublicKey = command.Info.InvitePublicKey,
                 InviteStatus = LogisticEnums.InviteStatus.Pending,
                 LastUpdated = now,
                 CreatedDate = now
@@ -150,9 +145,8 @@ namespace TransactionProcessor.Process
             if (!state.Any())
                 throw new InvalidTransactionException(_entityNotCreatedMessage);
 
-            var cancelInvite = JsonConvert.DeserializeObject<CancelInvite>(command.JsonContainer);
-            if (cancelInvite is null)
-                throw new InvalidTransactionException(_commandNullMessage);
+            if (command.Info.InvitePublicKey is null)
+                throw new InvalidTransactionException("Missing invited public key.");
 
             var entity = UnpackByteString(state.First().Value);
             if (NotEntityCreator(command.PublicKey, entity))
@@ -161,7 +155,7 @@ namespace TransactionProcessor.Process
             if (!entity.Final)
                 throw new InvalidTransactionException(_entityNotFinalMessage);
 
-            var matchingInvites = entity.SignOff.Invites.FindAll(x => PublicKeyComparison(x.PublicKey, cancelInvite.InvitedPublicKey));
+            var matchingInvites = entity.SignOff.Invites.FindAll(x => PublicKeyComparison(x.PublicKey, command.Info.InvitePublicKey));
             if (!matchingInvites.Any())
                 throw new InvalidTransactionException(_inviteDoesNotExists);
 
@@ -171,7 +165,7 @@ namespace TransactionProcessor.Process
 
             entity.SignOff.Invites.ForEach(x =>
             {
-                if (PublicKeyComparison(x.PublicKey, cancelInvite.InvitedPublicKey))
+                if (PublicKeyComparison(x.PublicKey, command.Info.InvitePublicKey))
                     x.InviteStatus = LogisticEnums.InviteStatus.Cancelled;
             });
 
@@ -183,10 +177,6 @@ namespace TransactionProcessor.Process
             var state = GetState(command.TransactionId, context);
             if (!state.Any())
                 throw new InvalidTransactionException(_entityNotCreatedMessage);
-
-            //var rejectInvite = JsonConvert.DeserializeObject<RejectInvite>(command.JsonContainer);
-            //if (rejectInvite is null)
-            //    throw new InvalidTransactionException(_rejectInviteNoReason);
 
             var entity = UnpackByteString(state.First().Value);
             if (!entity.Final)
@@ -214,10 +204,6 @@ namespace TransactionProcessor.Process
             var state = GetState(command.TransactionId, context);
             if (!state.Any())
                 throw new InvalidTransactionException(_entityNotCreatedMessage);
-
-            var acceptInvite = JsonConvert.DeserializeObject<AcceptInvite>(command.JsonContainer);
-            if (acceptInvite is null)
-                throw new InvalidTransactionException(_commandNullMessage);
 
             var entity = UnpackByteString(state.First().Value);
             if (!entity.Final)

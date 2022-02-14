@@ -7,6 +7,6 @@ namespace TransactionProcessor.Tools.Interfaces
 {
     internal interface ICryptographicService
     {
-        bool VerifySignature(CommandToken token);
+        bool VerifySignature(Token token);
     }
 }

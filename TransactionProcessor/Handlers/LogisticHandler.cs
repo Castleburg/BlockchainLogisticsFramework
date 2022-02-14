@@ -41,18 +41,18 @@ namespace TransactionProcessor.Handlers
 
             var bytes = request.Payload.ToByteArray();
             var stringPayload = Encoding.UTF8.GetString(bytes);
-            CommandToken token = null;
+            Token token = null;
             try
             {
-                token = JsonConvert.DeserializeObject<CommandToken>(stringPayload);
+                token = JsonConvert.DeserializeObject<Token>(stringPayload);
             }
             catch
             {
-                throw new InvalidTransactionException($"Could not unpack CommandToken.");
+                throw new InvalidTransactionException($"Could not unpack Token.");
             }
             
             if(token is null)
-                throw new InvalidTransactionException($"CommandToken was null.");
+                throw new InvalidTransactionException($"Token was null.");
 
             if (!_cryptographicService.VerifySignature(token))
                 throw new InvalidTransactionException($"Digital Signature was invalid.");

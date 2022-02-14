@@ -26,10 +26,8 @@ namespace ManualTests
 
             var client = new Client(clientAddress, "Test", "1.0");
 
-            var newEntity = new NewEntity()
-            {
-                CreatorId = "HelloWorld"
-            };
+            var newEntity = new NewEntity();
+
             var command = new Command()
             {
                 CommandType = LogisticEnums.Commands.NewEntity,

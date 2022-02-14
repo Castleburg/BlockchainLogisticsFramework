@@ -11,7 +11,7 @@ namespace TransactionProcessor.Tools
 {
     public class RsaDecryptionService : ICryptographicService
     {
-        public bool VerifySignature(CommandToken commandToken)
+        public bool VerifySignature(Token commandToken)
         {
             var rsa = RSA.Create();
             rsa.ImportParameters(commandToken.RsaParameters);
