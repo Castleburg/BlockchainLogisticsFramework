@@ -12,7 +12,7 @@ namespace SharedObjects.Logistic
 
         public Signatory(string id, byte[] publicKey, string jsonContainer, DateTime signedAt)
         {
-            Id = id,
+            Id = id;
             PublicKey = publicKey;
             JsonContainer = jsonContainer;
             SignedAt = signedAt;

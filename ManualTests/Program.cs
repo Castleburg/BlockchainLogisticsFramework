@@ -14,7 +14,7 @@ namespace ManualTests
 {
     internal class Program
     {
-        private static void Main2(string[] args)
+        private static void Main(string[] args)
         {
 
 
@@ -28,7 +28,6 @@ namespace ManualTests
             //processor.Run();
 
             var client = new Client(clientAddress, "Test", "1.0");
-
 
             var command = new Command()
             {

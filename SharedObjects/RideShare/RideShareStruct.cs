@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharedObjects.RideShare
 {
-    public class RideShare
+    public class RideShareStruct
     {
         public string DriverId { get; set; }
         public string Location { get; set; }

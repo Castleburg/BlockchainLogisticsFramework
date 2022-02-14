@@ -10,22 +10,47 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
 {
     internal class RideShareHandler : IRideShareHandler
     {
-        public CustomEvent AddPassenger(SharedObjects.RideShare.RideShare rideShareObj, SharedObjects.RideShare.RideShare latestRideShare)
-        {
 
+        public CustomEvent StopRide(RideShareStruct rideShare, RideShareStruct latestRideShare)
+        {
+            if (rideShare.DriverId == latestRideShare.DriverId)
+                throw new InvalidTransactionException("Driver Id is invalid");
+            if (latestRideShare.PassengerIdList.Count > 0)
+                throw new InvalidTransactionException("The number of passengers left needs to be zero, before a ride can be stopped.");
+
+            var stopRideEntity = new RideShareStruct
+            {
+                DriverId = latestRideShare.DriverId,
+                Location = rideShare.Location,
+                EventType = LogisticEnums.EventType.StopRide,
+                PassengerIdList = latestRideShare.PassengerIdList,
+                Status = RideShareEnums.RideStatus.Finished
+            };
+
+            CustomEvent newEvent = new CustomEvent
+            {
+                TimeStamp = DateTime.Now,
+                JsonContainer = JsonConvert.SerializeObject(stopRideEntity),
+                Type = LogisticEnums.EventType.StopRide
+            };
+            return newEvent;
+        }
+
+        public CustomEvent AddPassenger(RideShareStruct rideShareObj, RideShareStruct latestRideShare)
+        {
             if (rideShareObj.DriverId == rideShareObj.PassengerId)
                 throw new InvalidTransactionException("DriverId and PassengerId cannot be the same value");
             if (latestRideShare.PassengerIdList.Contains(rideShareObj.PassengerId))
                 throw new InvalidTransactionException("PassengerId already exists");
 
             latestRideShare.PassengerIdList.Add(rideShareObj.PassengerId);
-            var addPassengerRideShareEntity = new SharedObjects.RideShare.RideShare
+            var addPassengerRideShareEntity = new RideShareStruct
             {
-                DriverId = rideShareObj.DriverId,
+                DriverId = latestRideShare.DriverId,
                 Location = rideShareObj.Location,
                 EventType = LogisticEnums.EventType.AddPassenger,
                 PassengerIdList = latestRideShare.PassengerIdList,
-                Status = rideShareObj.Status
+                Status = latestRideShare.Status
             };
     
             var newEvent = new CustomEvent
@@ -37,18 +62,18 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
             return newEvent;
         }
 
-        public CustomEvent RemovePassenger(SharedObjects.RideShare.RideShare rideShareObj, SharedObjects.RideShare.RideShare latestRideShare)
+        public CustomEvent RemovePassenger(RideShareStruct rideShareObj, RideShareStruct latestRideShare)
         {
             if (!latestRideShare.PassengerIdList.Remove(rideShareObj.PassengerId))
                 throw new InvalidTransactionException("PassengerId is not in the list");
 
-            var removePassengerRideShareEntity = new SharedObjects.RideShare.RideShare
+            var removePassengerRideShareEntity = new RideShareStruct
             {
-                DriverId = rideShareObj.DriverId,
+                DriverId = latestRideShare.DriverId,
                 Location = rideShareObj.Location,
                 EventType = LogisticEnums.EventType.RemovePassenger,
                 PassengerIdList = latestRideShare.PassengerIdList,
-                Status = rideShareObj.Status
+                Status = latestRideShare.Status
             };
 
             var newEvent = new CustomEvent
@@ -56,23 +81,22 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
                 TimeStamp = DateTime.Now,
                 JsonContainer = JsonConvert.SerializeObject(removePassengerRideShareEntity),
                 Type = LogisticEnums.EventType.RemovePassenger
-
             };
             return newEvent;
         }
 
-        public CustomEvent CancelRide(SharedObjects.RideShare.RideShare rideShareObj, SharedObjects.RideShare.RideShare latestRideShare)
+        public CustomEvent CancelRide(RideShareStruct rideShareObj, RideShareStruct latestRideShare)
         {
             if (rideShareObj.DriverId == latestRideShare.DriverId)
                 throw new InvalidTransactionException("Driver Id is invalid");
 
-            var cancelRideEntity = new SharedObjects.RideShare.RideShare
+            var cancelRideEntity = new RideShareStruct
             {
-                DriverId = rideShareObj.DriverId,
-                Location = rideShareObj.Location,
+                DriverId = latestRideShare.DriverId,
+                Location = latestRideShare.Location,
                 EventType = LogisticEnums.EventType.CancelRide,
                 PassengerIdList = latestRideShare.PassengerIdList,
-                Status = rideShareObj.Status
+                Status = RideShareEnums.RideStatus.Cancelled
             };
 
             CustomEvent newEvent = new CustomEvent
@@ -84,15 +108,15 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
             return newEvent;
         }
 
-        public CustomEvent StartRide(SharedObjects.RideShare.RideShare rideShareObj, SharedObjects.RideShare.RideShare latestRideShare)
+        public CustomEvent StartRide(RideShareStruct rideShareObj)
         {
-            var cancelRideEntity = new SharedObjects.RideShare.RideShare
+            var cancelRideEntity = new RideShareStruct
             {
                 DriverId = rideShareObj.DriverId,
                 Location = rideShareObj.Location,
                 EventType = LogisticEnums.EventType.StartRide,
                 PassengerIdList = new List<string>(),
-                Status = rideShareObj.Status
+                Status = RideShareEnums.RideStatus.Ongoing
             };
 
             CustomEvent newEvent = new CustomEvent
@@ -104,15 +128,15 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
             return newEvent;
         }
 
-        public CustomEvent UpdateRide(SharedObjects.RideShare.RideShare rideShareObj, SharedObjects.RideShare.RideShare latestRideShare)
+        public CustomEvent UpdateRide(RideShareStruct rideShareObj, RideShareStruct latestRideShare)
         {
-            var updateRideEntity = new SharedObjects.RideShare.RideShare
+            var updateRideEntity = new RideShareStruct
             {
-                DriverId = rideShareObj.DriverId,
+                DriverId = latestRideShare.DriverId,
                 Location = rideShareObj.Location,
                 EventType = LogisticEnums.EventType.UpdateRide,
                 PassengerIdList = latestRideShare.PassengerIdList,
-                Status = rideShareObj.Status
+                Status = latestRideShare.Status
             };
 
             var newEvent = new CustomEvent
@@ -124,7 +148,7 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
             return newEvent;
         }
 
-        public void CheckStatus(SharedObjects.RideShare.RideShare rideShareObj)
+        public void CheckStatus(RideShareStruct rideShareObj)
         {
             switch (rideShareObj.Status)
             {
@@ -153,12 +177,12 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
             return signatoryReward;
         }
 
-        public SharedObjects.RideShare.RideShare GetRideShare(string jsonString)
+        public RideShareStruct GetRideShare(string jsonString)
         {
-            SharedObjects.RideShare.RideShare rideShare;
+            RideShareStruct rideShare;
             try
             {
-                rideShare = JsonConvert.DeserializeObject<SharedObjects.RideShare.RideShare>(jsonString);
+                rideShare = JsonConvert.DeserializeObject<RideShareStruct>(jsonString);
             }
             catch
             {
@@ -168,6 +192,5 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
                 throw new InvalidTransactionException("JSON string cannot be empty for RideShare.");
             return rideShare;
         }
-
     }
 }
