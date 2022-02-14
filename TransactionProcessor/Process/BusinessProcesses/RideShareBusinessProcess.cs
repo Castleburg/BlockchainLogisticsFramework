@@ -51,15 +51,9 @@ namespace TransactionProcessor.Process.BusinessProcesses
             var latestEvent = entity.Events.Last();
             var lastRideShareObj = JsonConvert.DeserializeObject<RideShare>(latestEvent.JsonContainer);
 
-            if (lastRideShareObj.Status == RideShareEnums.RideStatus.Cancelled ||
-                lastRideShareObj.Status == RideShareEnums.RideStatus.Finished)
-            {
-                if (!entity.Final)
-                    return true;
-                throw new InvalidTransactionException($"A ride cannot be marked final twice");
-            }
-
-            return false;
+            var rideCompleted = lastRideShareObj.Status == RideShareEnums.RideStatus.Cancelled ||
+                lastRideShareObj.Status == RideShareEnums.RideStatus.Finished;
+            return rideCompleted;
         }
 
         public string AcceptInvite(AddEvent newEvent, Entity entity)
