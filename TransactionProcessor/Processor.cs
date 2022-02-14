@@ -1,6 +1,7 @@
 ﻿using System;
 using TransactionProcessor.Handlers;
 using TransactionProcessor.Process;
+using TransactionProcessor.Process.BusinessProcesses;
 using TransactionProcessor.Tools;
 
 namespace TransactionProcessor
@@ -18,7 +19,8 @@ namespace TransactionProcessor
 
         public void Run()
         {
-            var logisticProcess = new LogisticProcessor("Test");
+            var businessProcess = new RideShareBusinessProcess();
+            var logisticProcess = new LogisticProcessor("Test", businessProcess);
             var cryptoService = new RsaDecryptionService();
 
             var processor = new Sawtooth.Sdk.Processor.TransactionProcessor(_validatorAddress);
