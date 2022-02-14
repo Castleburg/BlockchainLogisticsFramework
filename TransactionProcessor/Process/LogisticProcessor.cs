@@ -9,7 +9,7 @@ using Sawtooth.Sdk.Processor;
 using SharedObjects.Commands;
 using SharedObjects.Enums;
 using SharedObjects.Logistic;
-using TransactionProcessor.Process.Interfaces;
+using TransactionProcessor.Process.BusinessProcesses;
 
 namespace TransactionProcessor.Process
 {
@@ -72,6 +72,8 @@ namespace TransactionProcessor.Process
             if (command.Info.EventType == LogisticEnums.EventType.Undefined)
                 throw new InvalidTransactionException("EventType is undefined.");
 
+
+
             var entity = UnpackByteString(state.First().Value);
 
             if (NotEntityCreator(command.PublicKey, entity))
@@ -80,9 +82,11 @@ namespace TransactionProcessor.Process
             if (entity.Final)
                 throw new InvalidTransactionException(_entityFinalMessage);
 
-            var eventsCopy = entity.Events.ConvertAll(e =>
-                new CustomEvent(e.Type, e.JsonContainer, e.TimeStamp));
-            
+            var eventsCopy = EventsDeepCopy(entity.Events);
+            var newEvent = new CustomEvent(command.Info.EventType, command.Info.JsonContainer, command.TimeStamp);
+
+            _businessProcess.AddEvent(newEvent, eventsCopy);
+
             return entity;
         }
 
@@ -99,11 +103,13 @@ namespace TransactionProcessor.Process
             if (entity.Final)
                 throw new InvalidTransactionException(_entityFinalMessage);
 
-            //Check if Entity is valid to be made final
+            var eventsCopy = EventsDeepCopy(entity.Events);
+            if(!_businessProcess.MakeFinal(eventsCopy))
+                throw new InvalidTransactionException("Entity not eligible to be made final.");
 
+            entity.Final = true;
             return entity;
         }
-
 
         public Entity NewInvite(Command command, TransactionContext context)
         {
@@ -213,8 +219,9 @@ namespace TransactionProcessor.Process
             if (invite.InviteStatus != LogisticEnums.InviteStatus.Pending)
                 throw new InvalidTransactionException(_inviteNotPending);
 
-            //Check with business logic
-            //Create a signatory
+            var signatoriesCopy = SignatoriesDeepCopy(entity.SignOff.Signatories);
+
+            var jsonInviteResponse = _businessProcess.AcceptInvite(command.Info.JsonContainer, signatoriesCopy);
 
             entity.SignOff.Invites.ForEach(x =>
             {
@@ -222,12 +229,27 @@ namespace TransactionProcessor.Process
                     x.InviteStatus = LogisticEnums.InviteStatus.Signed;
             });
 
+            var newSignatory = new Signatory(command.Info.Id, command.PublicKey, jsonInviteResponse, DateTime.Now);
+
+            entity.SignOff.Signatories.Add(newSignatory);
             return entity;
         }
 
         private Dictionary<string, ByteString> GetState(Guid transactionId, TransactionContext context) => context.GetStateAsync(new[] { GetAddress(transactionId) }).Result;
 
         private string GetAddress(Guid transactionId) => Prefix + transactionId.ToByteArray().ToSha512().TakeLast(32).ToArray().ToHexString();
+
+        private List<Signatory> SignatoriesDeepCopy(List<Signatory> signatories)
+        {
+            return signatories.ConvertAll(s =>
+                new Signatory(s.Id, s.PublicKey, s.JsonContainer, s.SignedAt));
+        }
+
+        private List<CustomEvent> EventsDeepCopy(List<CustomEvent> events)
+        {
+            return events.ConvertAll(e =>
+                new CustomEvent(e.Type, e.JsonContainer, e.TimeStamp));
+        }
 
         private static Entity UnpackByteString(ByteString byteStringJson)
         {

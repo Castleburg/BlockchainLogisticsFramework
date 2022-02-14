@@ -2,6 +2,7 @@
 using TransactionProcessor.Handlers;
 using TransactionProcessor.Process;
 using TransactionProcessor.Process.BusinessProcesses;
+using TransactionProcessor.Process.BusinessProcesses.RideShare;
 using TransactionProcessor.Tools;
 
 namespace TransactionProcessor

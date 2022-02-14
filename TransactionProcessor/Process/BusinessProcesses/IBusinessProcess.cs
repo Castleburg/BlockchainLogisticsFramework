@@ -1,15 +1,12 @@
-﻿using Sawtooth.Sdk.Processor;
-using SharedObjects.Commands;
+﻿using System.Collections.Generic;
 using SharedObjects.Logistic;
-using System.Collections.Generic;
 
-namespace TransactionProcessor.Process.Interfaces
+namespace TransactionProcessor.Process.BusinessProcesses
 {
     internal interface IBusinessProcess
     {
         CustomEvent AddEvent(CustomEvent newEvent, List<CustomEvent> eventHistory);
-        bool MakeFinal(CustomEvent newEvent, List<CustomEvent> eventHistory);
+        bool MakeFinal(List<CustomEvent> eventHistory);
         string AcceptInvite(string jsonString, List<Signatory> signatoryList);
-
     }
 }

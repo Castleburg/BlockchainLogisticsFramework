@@ -2,7 +2,7 @@
 using SharedObjects.Commands;
 using SharedObjects.Logistic;
 
-namespace TransactionProcessor.Process.Interfaces
+namespace TransactionProcessor.Process
 {
     internal interface ILogisticProcessor
     {

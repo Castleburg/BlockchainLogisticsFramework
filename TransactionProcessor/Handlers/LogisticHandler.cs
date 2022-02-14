@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 using SharedObjects.Commands;
 using SharedObjects.Enums;
 using SharedObjects.Logistic;
-using TransactionProcessor.Process.Interfaces;
+using TransactionProcessor.Process;
 using TransactionProcessor.Tools.Interfaces;
 
 namespace TransactionProcessor.Handlers

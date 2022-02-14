@@ -1,27 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Sawtooth.Sdk.Processor;
 using SharedObjects.Enums;
 using SharedObjects.Logistic;
 using SharedObjects.RideShare;
-using System.Linq;
-using Sawtooth.Sdk.Processor;
 
-namespace TransactionProcessor.Process.ProcessHandler
+namespace TransactionProcessor.Process.BusinessProcesses.RideShare
 {
-    internal class RidesharingHandler : IRidesharingHandler
+    internal class RideShareHandler : IRideShareHandler
     {
-        public CustomEvent AddPassenger(RideShare rideShareObj, RideShare latestRideShare)
+        public CustomEvent AddPassenger(SharedObjects.RideShare.RideShare rideShareObj, SharedObjects.RideShare.RideShare latestRideShare)
         {
 
             if (rideShareObj.DriverId == rideShareObj.PassengerId)
-                throw new InvalidTransactionException($"DriverId and PassengerId cannot be the same value");
+                throw new InvalidTransactionException("DriverId and PassengerId cannot be the same value");
             if (latestRideShare.PassengerIdList.Contains(rideShareObj.PassengerId))
-                throw new InvalidTransactionException($"PassengerId already exists");
+                throw new InvalidTransactionException("PassengerId already exists");
 
             latestRideShare.PassengerIdList.Add(rideShareObj.PassengerId);
-            var addPassengerRideShareEntity = new RideShare
+            var addPassengerRideShareEntity = new SharedObjects.RideShare.RideShare
             {
                 DriverId = rideShareObj.DriverId,
                 Location = rideShareObj.Location,
@@ -30,7 +28,7 @@ namespace TransactionProcessor.Process.ProcessHandler
                 Status = rideShareObj.Status
             };
     
-            CustomEvent newEvent = new CustomEvent
+            var newEvent = new CustomEvent
             {
                 TimeStamp = DateTime.Now,
                 JsonContainer = JsonConvert.SerializeObject(addPassengerRideShareEntity),
@@ -39,12 +37,12 @@ namespace TransactionProcessor.Process.ProcessHandler
             return newEvent;
         }
 
-        public CustomEvent RemovePassenger(RideShare rideShareObj, RideShare latestRideShare)
+        public CustomEvent RemovePassenger(SharedObjects.RideShare.RideShare rideShareObj, SharedObjects.RideShare.RideShare latestRideShare)
         {
             if (!latestRideShare.PassengerIdList.Remove(rideShareObj.PassengerId))
-                throw new InvalidTransactionException($"PassengerId is not in the list");
+                throw new InvalidTransactionException("PassengerId is not in the list");
 
-            var removePassengerRideShareEntity = new RideShare
+            var removePassengerRideShareEntity = new SharedObjects.RideShare.RideShare
             {
                 DriverId = rideShareObj.DriverId,
                 Location = rideShareObj.Location,
@@ -53,7 +51,7 @@ namespace TransactionProcessor.Process.ProcessHandler
                 Status = rideShareObj.Status
             };
 
-            CustomEvent newEvent = new CustomEvent
+            var newEvent = new CustomEvent
             {
                 TimeStamp = DateTime.Now,
                 JsonContainer = JsonConvert.SerializeObject(removePassengerRideShareEntity),
@@ -63,12 +61,12 @@ namespace TransactionProcessor.Process.ProcessHandler
             return newEvent;
         }
 
-        public CustomEvent CancelRide(RideShare rideShareObj, RideShare latestRideShare)
+        public CustomEvent CancelRide(SharedObjects.RideShare.RideShare rideShareObj, SharedObjects.RideShare.RideShare latestRideShare)
         {
             if (rideShareObj.DriverId == latestRideShare.DriverId)
-                throw new InvalidTransactionException($"Driver Id is invalid");
+                throw new InvalidTransactionException("Driver Id is invalid");
 
-            var cancelRideEntity = new RideShare
+            var cancelRideEntity = new SharedObjects.RideShare.RideShare
             {
                 DriverId = rideShareObj.DriverId,
                 Location = rideShareObj.Location,
@@ -86,9 +84,9 @@ namespace TransactionProcessor.Process.ProcessHandler
             return newEvent;
         }
 
-        public CustomEvent StartRide(RideShare rideShareObj, RideShare latestRideShare)
+        public CustomEvent StartRide(SharedObjects.RideShare.RideShare rideShareObj, SharedObjects.RideShare.RideShare latestRideShare)
         {
-            var cancelRideEntity = new RideShare
+            var cancelRideEntity = new SharedObjects.RideShare.RideShare
             {
                 DriverId = rideShareObj.DriverId,
                 Location = rideShareObj.Location,
@@ -106,9 +104,9 @@ namespace TransactionProcessor.Process.ProcessHandler
             return newEvent;
         }
 
-        public CustomEvent UpdateRide(RideShare rideShareObj, RideShare latestRideShare)
+        public CustomEvent UpdateRide(SharedObjects.RideShare.RideShare rideShareObj, SharedObjects.RideShare.RideShare latestRideShare)
         {
-            var updateRideEntity = new RideShare
+            var updateRideEntity = new SharedObjects.RideShare.RideShare
             {
                 DriverId = rideShareObj.DriverId,
                 Location = rideShareObj.Location,
@@ -117,7 +115,7 @@ namespace TransactionProcessor.Process.ProcessHandler
                 Status = rideShareObj.Status
             };
 
-            CustomEvent newEvent = new CustomEvent
+            var newEvent = new CustomEvent
             {
                 TimeStamp = DateTime.Now,
                 JsonContainer = JsonConvert.SerializeObject(updateRideEntity),
@@ -126,12 +124,17 @@ namespace TransactionProcessor.Process.ProcessHandler
             return newEvent;
         }
 
-        public void CheckStatus(RideShare rideShareObj)
+        public void CheckStatus(SharedObjects.RideShare.RideShare rideShareObj)
         {
-            if (rideShareObj.Status == RideShareEnums.RideStatus.Cancelled)
-                throw new InvalidTransactionException($"Ride has been cancelled, new events cannot be added");
-            if (rideShareObj.Status == RideShareEnums.RideStatus.Finished)
-                throw new InvalidTransactionException($"Ride has been finished, new events cannot be added");
+            switch (rideShareObj.Status)
+            {
+                case RideShareEnums.RideStatus.Cancelled:
+                    throw new InvalidTransactionException("Ride has been cancelled, new events cannot be added");
+                case RideShareEnums.RideStatus.Finished:
+                    throw new InvalidTransactionException("Ride has been finished, new events cannot be added");
+                case RideShareEnums.RideStatus.Ongoing:
+                    break;
+            }
         }
 
         public RideShareSignatoryReward GetSignatoryReward(string jsonString)
@@ -143,26 +146,26 @@ namespace TransactionProcessor.Process.ProcessHandler
             }
             catch
             {
-                throw new InvalidTransactionException($"Could not unpack signatoryReward.");
+                throw new InvalidTransactionException("Could not unpack signatoryReward.");
             }
             if (signatoryReward is null)
-                throw new InvalidTransactionException($"JSON string cannot be empty for signatory reward.");
+                throw new InvalidTransactionException("JSON string cannot be empty for signatory reward.");
             return signatoryReward;
         }
 
-        public RideShare GetRideShare(string jsonString)
+        public SharedObjects.RideShare.RideShare GetRideShare(string jsonString)
         {
-            RideShare rideShare;
+            SharedObjects.RideShare.RideShare rideShare;
             try
             {
-                rideShare = JsonConvert.DeserializeObject<RideShare>(jsonString);
+                rideShare = JsonConvert.DeserializeObject<SharedObjects.RideShare.RideShare>(jsonString);
             }
             catch
             {
-                throw new InvalidTransactionException($"Could not unpack RideShare.");
+                throw new InvalidTransactionException("Could not unpack RideShare.");
             }
             if (rideShare is null)
-                throw new InvalidTransactionException($"JSON string cannot be empty for RideShare.");
+                throw new InvalidTransactionException("JSON string cannot be empty for RideShare.");
             return rideShare;
         }
 

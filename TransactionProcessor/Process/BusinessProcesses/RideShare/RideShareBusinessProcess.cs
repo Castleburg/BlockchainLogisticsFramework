@@ -1,20 +1,21 @@
 ﻿using System;
-using SharedObjects.Logistic;
-using Sawtooth.Sdk.Processor;
-using SharedObjects.Commands;
-using SharedObjects.Enums;
-using TransactionProcessor.Process.Interfaces;
-using TransactionProcessor.Process.ProcessHandler;
-using SharedObjects.RideShare;
-using Newtonsoft.Json;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json;
+using Sawtooth.Sdk.Processor;
+using SharedObjects.Enums;
+using SharedObjects.Logistic;
 
-namespace TransactionProcessor.Process.BusinessProcesses
+namespace TransactionProcessor.Process.BusinessProcesses.RideShare
 {
     internal class RideShareBusinessProcess : IBusinessProcess
     {
-        readonly IRidesharingHandler _rideHandler = new RidesharingHandler();
+        readonly IRideShareHandler _rideHandler;
+
+        public RideShareBusinessProcess()
+        {
+            _rideHandler = new RideShareHandler();
+        }
 
         public CustomEvent AddEvent(CustomEvent newEvent, List<CustomEvent> eventHistory)
         {
@@ -40,10 +41,10 @@ namespace TransactionProcessor.Process.BusinessProcesses
             return resultingEvent;
         }      
 
-        public bool MakeFinal(CustomEvent newEvent, List<CustomEvent> eventHistory)
+        public bool MakeFinal(List<CustomEvent> eventHistory)
         {
             var latestEvent = eventHistory.Last();
-            var lastRideShareObj = JsonConvert.DeserializeObject<RideShare>(latestEvent.JsonContainer);
+            var lastRideShareObj = _rideHandler.GetRideShare(latestEvent.JsonContainer);
 
             var rideCompleted = lastRideShareObj.Status == RideShareEnums.RideStatus.Cancelled ||
                                 lastRideShareObj.Status == RideShareEnums.RideStatus.Finished;
@@ -54,17 +55,16 @@ namespace TransactionProcessor.Process.BusinessProcesses
         {
             if (signatoryList.Count != 0)
                 throw new InvalidTransactionException($"For ride sharing, only one signatory is allowed");
-            RideShareSignatoryReward signatoryReward = _rideHandler.GetSignatoryReward(jsonString);
+            var signatoryReward = _rideHandler.GetSignatoryReward(jsonString);
 
             var invalidLocation = string.IsNullOrEmpty(signatoryReward.Location);
             var fromTimeStampDoesNotExist = signatoryReward.From == new DateTime();
             var tillTimeStampDoesNotExist = signatoryReward.Till == new DateTime();
 
             if (invalidLocation || fromTimeStampDoesNotExist || tillTimeStampDoesNotExist)
-                throw new InvalidTransactionException($"The JSON string provided to AcceptInvite had errrenerous fields");
+                throw new InvalidTransactionException($"The JSON string provided to AcceptInvite had erroneous fields");
             return jsonString;
         }
-
         
     }
 }
