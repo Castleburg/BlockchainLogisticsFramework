@@ -11,6 +11,5 @@ namespace SharedObjects.Enums
         public enum EntityType { RideShare }
 
         public enum EventType { StartRide, AddPassenger, RemovePassenger, StopRide, CancelRide, UpdateRide}
-
     }
 }

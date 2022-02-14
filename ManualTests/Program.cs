@@ -14,8 +14,11 @@ namespace ManualTests
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static void Main2(string[] args)
         {
+
+
+
 
             Console.WriteLine("Starting up!");
             var validatorAddress = "tcp://" + (args.Any() ? args.First() : "192.168.0.106:4004");
