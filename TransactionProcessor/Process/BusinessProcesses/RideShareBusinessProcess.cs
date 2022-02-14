@@ -8,6 +8,7 @@ using TransactionProcessor.Process.ProcessHandler;
 using SharedObjects.RideShare;
 using Newtonsoft.Json;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace TransactionProcessor.Process.BusinessProcesses
 {
@@ -15,14 +16,15 @@ namespace TransactionProcessor.Process.BusinessProcesses
     {
         readonly IRidesharingHandler _rideHandler = new RidesharingHandler();
 
-        public CustomEvent AddEvent(AddEvent newEvent, Entity entity)
+        public CustomEvent AddEvent(CustomEvent newEvent, List<CustomEvent> eventHistory)
         {
             var json = newEvent.JsonContainer;
-            var rideShareObj = JsonConvert.DeserializeObject<RideShare>(json);
-            var latestEvent = entity.Events.Last();
-            var lastRideShareObj = JsonConvert.DeserializeObject<RideShare>(latestEvent.JsonContainer);
 
-            CheckStatus(rideShareObj);
+            var rideShareObj = _rideHandler.GetRideShare(json);
+            var latestEvent  = eventHistory.Last();
+            var lastRideShareObj = _rideHandler.GetRideShare(latestEvent.JsonContainer);
+
+            _rideHandler.CheckStatus(rideShareObj);
 
             var resultingEvent = newEvent.Type switch
             {
@@ -36,32 +38,33 @@ namespace TransactionProcessor.Process.BusinessProcesses
             };
 
             return resultingEvent;
-        }
+        }      
 
-        private static void CheckStatus(RideShare rideShareObj)
+        public bool MakeFinal(CustomEvent newEvent, List<CustomEvent> eventHistory)
         {
-            if (rideShareObj.Status == RideShareEnums.RideStatus.Cancelled)
-                throw new InvalidTransactionException($"Ride has been cancelled, new events cannot be added");
-            if (rideShareObj.Status == RideShareEnums.RideStatus.Finished)
-                throw new InvalidTransactionException($"Ride has been finished, new events cannot be added");
-        }
-
-        public bool MakeFinal(AddEvent newEvent, Entity entity)
-        {
-            var latestEvent = entity.Events.Last();
+            var latestEvent = eventHistory.Last();
             var lastRideShareObj = JsonConvert.DeserializeObject<RideShare>(latestEvent.JsonContainer);
 
             var rideCompleted = lastRideShareObj.Status == RideShareEnums.RideStatus.Cancelled ||
-                lastRideShareObj.Status == RideShareEnums.RideStatus.Finished;
+                                lastRideShareObj.Status == RideShareEnums.RideStatus.Finished;
             return rideCompleted;
         }
 
-        public string AcceptInvite(AddEvent newEvent, Entity entity)
+        public string AcceptInvite(string jsonString, List<Signatory> signatoryList)
         {
-            //load data, 
-            //tjek den ikke er final?
-            //Marker at den skal finalizes?
-            throw new NotImplementedException();
+            if (signatoryList.Count != 0)
+                throw new InvalidTransactionException($"For ride sharing, only one signatory is allowed");
+            RideShareSignatoryReward signatoryReward = _rideHandler.GetSignatoryReward(jsonString);
+
+            var invalidLocation = string.IsNullOrEmpty(signatoryReward.Location);
+            var fromTimeStampDoesNotExist = signatoryReward.From == new DateTime();
+            var tillTimeStampDoesNotExist = signatoryReward.Till == new DateTime();
+
+            if (invalidLocation || fromTimeStampDoesNotExist || tillTimeStampDoesNotExist)
+                throw new InvalidTransactionException($"The JSON string provided to AcceptInvite had errrenerous fields");
+            return jsonString;
         }
+
+        
     }
 }
