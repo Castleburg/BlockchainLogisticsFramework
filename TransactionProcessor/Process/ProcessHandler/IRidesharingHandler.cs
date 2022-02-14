@@ -10,5 +10,9 @@ namespace TransactionProcessor.Process.ProcessHandler
         public CustomEvent StartRide(RideShare rideShare, RideShare latestRideShare);
         public CustomEvent CancelRide(RideShare rideShare, RideShare latestRideShare);
         public CustomEvent UpdateRide(RideShare rideShare, RideShare latestRideShare);
+        public void CheckStatus(RideShare rideShareObj);
+        public RideShareSignatoryReward GetSignatoryReward(string jsonString);
+        public RideShare GetRideShare(string jsonString);
+
     }
 }

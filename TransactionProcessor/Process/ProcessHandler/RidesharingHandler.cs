@@ -33,7 +33,8 @@ namespace TransactionProcessor.Process.ProcessHandler
             CustomEvent newEvent = new CustomEvent
             {
                 TimeStamp = DateTime.Now,
-                JsonContainer = JsonConvert.SerializeObject(addPassengerRideShareEntity)
+                JsonContainer = JsonConvert.SerializeObject(addPassengerRideShareEntity),
+                Type = LogisticEnums.EventType.AddPassenger
             };
             return newEvent;
         }
@@ -47,7 +48,7 @@ namespace TransactionProcessor.Process.ProcessHandler
             {
                 DriverId = rideShareObj.DriverId,
                 Location = rideShareObj.Location,
-                EventType = LogisticEnums.EventType.AddPassenger,
+                EventType = LogisticEnums.EventType.RemovePassenger,
                 PassengerIdList = latestRideShare.PassengerIdList,
                 Status = rideShareObj.Status
             };
@@ -55,7 +56,9 @@ namespace TransactionProcessor.Process.ProcessHandler
             CustomEvent newEvent = new CustomEvent
             {
                 TimeStamp = DateTime.Now,
-                JsonContainer = JsonConvert.SerializeObject(removePassengerRideShareEntity)
+                JsonContainer = JsonConvert.SerializeObject(removePassengerRideShareEntity),
+                Type = LogisticEnums.EventType.RemovePassenger
+
             };
             return newEvent;
         }
@@ -77,7 +80,8 @@ namespace TransactionProcessor.Process.ProcessHandler
             CustomEvent newEvent = new CustomEvent
             {
                 TimeStamp = DateTime.Now,
-                JsonContainer = JsonConvert.SerializeObject(cancelRideEntity)
+                JsonContainer = JsonConvert.SerializeObject(cancelRideEntity),
+                Type = LogisticEnums.EventType.CancelRide
             };
             return newEvent;
         }
@@ -96,7 +100,8 @@ namespace TransactionProcessor.Process.ProcessHandler
             CustomEvent newEvent = new CustomEvent
             {
                 TimeStamp = DateTime.Now,
-                JsonContainer = JsonConvert.SerializeObject(cancelRideEntity)
+                JsonContainer = JsonConvert.SerializeObject(cancelRideEntity),
+                Type = LogisticEnums.EventType.StartRide
             };
             return newEvent;
         }
@@ -115,9 +120,50 @@ namespace TransactionProcessor.Process.ProcessHandler
             CustomEvent newEvent = new CustomEvent
             {
                 TimeStamp = DateTime.Now,
-                JsonContainer = JsonConvert.SerializeObject(updateRideEntity)
+                JsonContainer = JsonConvert.SerializeObject(updateRideEntity),
+                Type = LogisticEnums.EventType.UpdateRide
             };
             return newEvent;
+        }
+
+        public void CheckStatus(RideShare rideShareObj)
+        {
+            if (rideShareObj.Status == RideShareEnums.RideStatus.Cancelled)
+                throw new InvalidTransactionException($"Ride has been cancelled, new events cannot be added");
+            if (rideShareObj.Status == RideShareEnums.RideStatus.Finished)
+                throw new InvalidTransactionException($"Ride has been finished, new events cannot be added");
+        }
+
+        public RideShareSignatoryReward GetSignatoryReward(string jsonString)
+        {
+            RideShareSignatoryReward signatoryReward;
+            try
+            {
+                signatoryReward = JsonConvert.DeserializeObject<RideShareSignatoryReward>(jsonString);
+            }
+            catch
+            {
+                throw new InvalidTransactionException($"Could not unpack signatoryReward.");
+            }
+            if (signatoryReward is null)
+                throw new InvalidTransactionException($"JSON string cannot be empty for signatory reward.");
+            return signatoryReward;
+        }
+
+        public RideShare GetRideShare(string jsonString)
+        {
+            RideShare rideShare;
+            try
+            {
+                rideShare = JsonConvert.DeserializeObject<RideShare>(jsonString);
+            }
+            catch
+            {
+                throw new InvalidTransactionException($"Could not unpack RideShare.");
+            }
+            if (rideShare is null)
+                throw new InvalidTransactionException($"JSON string cannot be empty for RideShare.");
+            return rideShare;
         }
 
     }

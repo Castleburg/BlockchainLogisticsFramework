@@ -29,12 +29,10 @@ namespace ManualTests
 
             var client = new Client(clientAddress, "Test", "1.0");
 
-            var newEntity = new NewEntity();
 
             var command = new Command()
             {
                 CommandType = LogisticEnums.Commands.NewEntity,
-                JsonContainer = JsonConvert.SerializeObject(newEntity),
                 TimeStamp = DateTime.Now,
                 TransactionId = Guid.NewGuid()
             };

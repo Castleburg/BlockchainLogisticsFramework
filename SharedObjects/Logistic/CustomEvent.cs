@@ -5,7 +5,11 @@ namespace SharedObjects.Logistic
 {
     public class CustomEvent
     {
-        public Event(LogisticEnums.EventType type, string jsonContainer, DateTime timeStamp)
+        public CustomEvent()
+        {
+        }
+
+        public CustomEvent(LogisticEnums.EventType type, string jsonContainer, DateTime timeStamp)
         {
             Type = type;
             JsonContainer = jsonContainer;
