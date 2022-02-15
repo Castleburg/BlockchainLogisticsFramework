@@ -8,8 +8,7 @@ namespace SawtoothClient.RideSharing
 {
     class RideShareClientCalls
     {
-        public static RideShareStruct StartRide(string driverId,
-                                          string location)
+        public static RideShareStruct StartRide(string driverId, string location)
         {
             var rideShareObj = new RideShareStruct
             {

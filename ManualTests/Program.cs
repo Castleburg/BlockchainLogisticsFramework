@@ -16,10 +16,6 @@ namespace ManualTests
     {
         private static void Main(string[] args)
         {
-
-
-
-
             Console.WriteLine("Starting up!");
             var validatorAddress = "tcp://" + (args.Any() ? args.First() : "192.168.0.106:4004");
             var clientAddress = "http://" + (args.Any() ? args.First() : "192.168.0.106:8008/batches");
@@ -42,7 +38,7 @@ namespace ManualTests
             var signer = new RsaEncryptionService();
             var commandToken = signer.SignCommand(command, param, "SHA256");
 
-            var result = client.PostPayload(JsonConvert.SerializeObject(commandToken));
+            //var result = client.PostPayload(JsonConvert.SerializeObject(commandToken));
 
             Console.WriteLine("Done!");
         }
