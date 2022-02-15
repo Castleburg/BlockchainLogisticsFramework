@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using Google.Protobuf;
 using Newtonsoft.Json;
 using Sawtooth.Sdk;
@@ -72,8 +71,6 @@ namespace TransactionProcessor.Process
             if (command.Info.EventType == LogisticEnums.EventType.Undefined)
                 throw new InvalidTransactionException("EventType is undefined.");
 
-
-
             var entity = UnpackByteString(state.First().Value);
 
             if (NotEntityCreator(command.PublicKey, entity))
@@ -83,10 +80,11 @@ namespace TransactionProcessor.Process
                 throw new InvalidTransactionException(_entityFinalMessage);
 
             var eventsCopy = EventsDeepCopy(entity.Events);
-            var newEvent = new CustomEvent(command.Info.EventType, command.Info.JsonContainer, command.TimeStamp);
+            var cEvent = new CustomEvent(command.Info.EventType, command.Info.JsonContainer, command.TimeStamp);
 
-            _businessProcess.AddEvent(newEvent, eventsCopy);
+            var newEvent = _businessProcess.AddEvent(cEvent, eventsCopy);
 
+            entity.Events.Add(newEvent);
             return entity;
         }
 
