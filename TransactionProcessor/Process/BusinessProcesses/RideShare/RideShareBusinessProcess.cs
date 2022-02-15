@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Sawtooth.Sdk.Processor;
 using SharedObjects.Enums;
 using SharedObjects.Logistic;
+using SharedObjects.RideShare;
 
 namespace TransactionProcessor.Process.BusinessProcesses.RideShare
 {
@@ -20,19 +21,23 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
         public CustomEvent AddEvent(CustomEvent newEvent, List<CustomEvent> eventHistory)
         {
             var json = newEvent.JsonContainer;
-
             var rideShareObj = _rideHandler.GetRideShare(json);
-            var latestEvent  = eventHistory.Last();
-            var lastRideShareObj = _rideHandler.GetRideShare(latestEvent.JsonContainer);
-
+            RideShareStruct lastRideShareObj = null;
+            if (newEvent.Type != LogisticEnums.EventType.StartRide)
+            {
+                CustomEvent latestEvent = eventHistory.Last();
+                lastRideShareObj = _rideHandler.GetRideShare(latestEvent.JsonContainer);
+            }
             _rideHandler.CheckStatus(rideShareObj);
 
             var resultingEvent = newEvent.Type switch
             {
+                LogisticEnums.EventType.StartRide => _rideHandler.StartRide(rideShareObj),
                 LogisticEnums.EventType.AddPassenger => _rideHandler.AddPassenger(rideShareObj, lastRideShareObj),
                 LogisticEnums.EventType.RemovePassenger => _rideHandler.RemovePassenger(rideShareObj, lastRideShareObj),
-                LogisticEnums.EventType.StartRide => _rideHandler.StartRide(rideShareObj, lastRideShareObj),
                 LogisticEnums.EventType.CancelRide => _rideHandler.CancelRide(rideShareObj, lastRideShareObj),
+                LogisticEnums.EventType.StopRide => _rideHandler.StopRide(rideShareObj, lastRideShareObj),
+
                 LogisticEnums.EventType.UpdateRide => _rideHandler.UpdateRide(rideShareObj, lastRideShareObj),
 
                 _ => throw new InvalidTransactionException($"Unknown ActionType {newEvent.Type}")

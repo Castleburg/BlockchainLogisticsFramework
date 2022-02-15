@@ -41,7 +41,7 @@ namespace TransactionProcessor.Handlers
 
             var bytes = request.Payload.ToByteArray();
             var stringPayload = Encoding.UTF8.GetString(bytes);
-            Token token = null;
+            Token token;
             try
             {
                 token = JsonConvert.DeserializeObject<Token>(stringPayload);
