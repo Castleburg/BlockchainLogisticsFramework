@@ -48,6 +48,7 @@ namespace TransactionProcessor.Process
             {
                 Type = command.Info.EntityType,
                 PublicKey = command.PublicKey,
+                CreatorId = command.Info.Id,
                 TransactionId = command.TransactionId,
                 Events = new List<SharedObjects.Logistic.CustomEvent>(),
                 SignOff = new SignOff()

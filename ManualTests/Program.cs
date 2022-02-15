@@ -23,7 +23,7 @@ namespace ManualTests
             //var processor = new Processor(validatorAddress);
             //processor.Run();
 
-            var client = new Client(clientAddress, "Test", "1.0");
+            var client = new SawtoothClient.SawtoothClient(clientAddress, "Test", "1.0");
 
             var command = new Command()
             {

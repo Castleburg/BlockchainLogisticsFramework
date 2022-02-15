@@ -30,7 +30,7 @@ namespace SawtoothClient
         readonly string next;
     }
 
-    public class Client
+    public class SawtoothClient
     {
         private readonly string _address;
         private readonly string _prefix;
@@ -43,7 +43,7 @@ namespace SawtoothClient
 
         private readonly HttpClient _httpClient;
 
-        public Client(string address, string familyName, string familyVersion)
+        public SawtoothClient(string address, string familyName, string familyVersion)
         {
             _address = address;
             _httpClient = new HttpClient();
