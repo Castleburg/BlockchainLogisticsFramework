@@ -36,28 +36,32 @@ namespace TransactionProcessor.Handlers
 
         public async Task ApplyAsync(TpProcessRequest request, TransactionContext context)
         {
-            //var obj = CBORObject.DecodeFromBytes(request.Payload.ToByteArray());
-            //var token = obj["command"].ToObject<CommandToken>();
-
-            var bytes = request.Payload.ToByteArray();
-            var stringPayload = Encoding.UTF8.GetString(bytes);
-            Token token;
             try
             {
-                token = JsonConvert.DeserializeObject<Token>(stringPayload);
+                var bytes = request.Payload.ToByteArray();
+                var stringPayload = Encoding.UTF8.GetString(bytes);
+                Token token;
+                try
+                {
+                    token = JsonConvert.DeserializeObject<Token>(stringPayload);
+                }
+                catch
+                {
+                    throw new InvalidTransactionException($"Could not unpack Token.");
+                }
+
+                if (token is null)
+                    throw new InvalidTransactionException($"Token was null.");
+
+                if (!_cryptographicService.VerifySignature(token))
+                    throw new InvalidTransactionException($"Digital Signature was invalid.");
+
+                await HandleRequest(token.Command, context);
             }
             catch
             {
-                throw new InvalidTransactionException($"Could not unpack Token.");
+                throw new InvalidTransactionException($"Something went terribly wrong.");
             }
-            
-            if(token is null)
-                throw new InvalidTransactionException($"Token was null.");
-
-            if (!_cryptographicService.VerifySignature(token))
-                throw new InvalidTransactionException($"Digital Signature was invalid.");
-
-            await HandleRequest(token.Command, context);
         }
 
         private async Task HandleRequest(Command command, TransactionContext context)

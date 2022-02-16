@@ -20,6 +20,7 @@ namespace SawtoothClient.Logistic
         {
             _publicKey = publicKey;
             _sawtoothClient = client;
+            _encryptionService = encryptionService;
         }
 
         public TransactionStatus NewEntity(LogisticEnums.EntityType entityType, string creatorId)
