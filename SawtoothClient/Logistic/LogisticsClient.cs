@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography;
 using Newtonsoft.Json;
 using SawtoothClient.Objects;
+using SawtoothClient.Tools;
 using SharedObjects.Commands;
 using SharedObjects.Enums;
 
@@ -10,10 +12,11 @@ namespace SawtoothClient.Logistic
 {
     public class LogisticsClient
     {
-        private readonly SawtoothClient _sawtoothClient;
         private readonly byte[] _publicKey;
+        private readonly SawtoothClient _sawtoothClient;
+        private readonly RsaEncryptionService _encryptionService;
 
-        public LogisticsClient(byte[] publicKey, SawtoothClient client)
+        public LogisticsClient(byte[] publicKey, SawtoothClient client, RsaEncryptionService encryptionService)
         {
             _publicKey = publicKey;
             _sawtoothClient = client;
@@ -36,8 +39,10 @@ namespace SawtoothClient.Logistic
                 TimeStamp = DateTime.Now
             };
 
-            var jsonCommand = JsonConvert.SerializeObject(command);
-            var response = _sawtoothClient.PostBatch(jsonCommand);
+            var token = _encryptionService.SignCommand(command);
+
+            var jsonToken = JsonConvert.SerializeObject(token);
+            var response = _sawtoothClient.PostBatch(jsonToken);
             
             if (response.StatusCode != HttpStatusCode.Accepted)
                 throw new HttpRequestException($"Message was not accepted! StatusCode: {response.StatusCode}, ReasonPhrase: {response.ReasonPhrase}");
@@ -172,5 +177,6 @@ namespace SawtoothClient.Logistic
             var jsonCommand = JsonConvert.SerializeObject(command);
             return _sawtoothClient.PostBatch(jsonCommand);
         }
+
     }
 }

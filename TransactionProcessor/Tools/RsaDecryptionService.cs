@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
+using Sawtooth.Sdk.Processor;
 using SharedObjects.Commands;
 using TransactionProcessor.Tools.Interfaces;
 
@@ -11,18 +12,26 @@ namespace TransactionProcessor.Tools
 {
     public class RsaDecryptionService : ICryptographicService
     {
-        public bool VerifySignature(Token commandToken)
+        public bool VerifySignature(Token token)
         {
-            var rsa = RSA.Create();
-            rsa.ImportParameters(commandToken.RsaParameters);
+            try
+            {
+                var rsa = RSA.Create();
+                rsa.ImportParameters(token.RsaParameters);
 
-            var rsaDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
-            rsaDeformatter.SetHashAlgorithm(commandToken.HashAlgorithm);
+                var rsaDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
+                rsaDeformatter.SetHashAlgorithm(token.HashAlgorithm);
 
-            var publicKey = rsa.ExportRSAPublicKey();
+                var publicKey = rsa.ExportRSAPublicKey();
 
-            return rsaDeformatter.VerifySignature(commandToken.Signature.HashedCommand, commandToken.Signature.SignedHashedCommand) &&
-                   publicKey.SequenceEqual(commandToken.Command.PublicKey);
+                return rsaDeformatter.VerifySignature(token.Signature.HashedCommand,
+                           token.Signature.SignedHashedCommand) &&
+                       publicKey.SequenceEqual(token.Command.PublicKey);
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

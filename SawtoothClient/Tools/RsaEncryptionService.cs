@@ -10,14 +10,23 @@ namespace SawtoothClient.Tools
 {
     public class RsaEncryptionService
     {
-        public Token SignCommand(Command command, RSAParameters privateRsaParameters, string hashAlgorithm)
+        private readonly RSAParameters _privateRsaParameters;
+        private readonly string _hashAlgorithm;
+
+        public RsaEncryptionService(RSAParameters privateRsaParameters, string hashAlgorithm = "SHA256")
+        {
+            _privateRsaParameters = privateRsaParameters;
+            _hashAlgorithm = hashAlgorithm;
+        }
+
+        public Token SignCommand(Command command)
         {
 
             var rsa = RSA.Create();
-            rsa.ImportParameters(privateRsaParameters);
+            rsa.ImportParameters(_privateRsaParameters);
 
             var rsaFormatter = new RSAPKCS1SignatureFormatter(rsa);
-            rsaFormatter.SetHashAlgorithm(hashAlgorithm); //SHA256
+            rsaFormatter.SetHashAlgorithm(_hashAlgorithm);
 
             command.PublicKey = rsa.ExportRSAPublicKey();
 
@@ -25,16 +34,6 @@ namespace SawtoothClient.Tools
             var signedBytes = rsaFormatter.CreateSignature(bytes);
             var publicRsaParameters = rsa.ExportParameters(false); //true returns public and private key, false only public
 
-            //var rsa = new RSACryptoServiceProvider(2048);
-            //rsa.ImportParameters(privateRsaParameters);
-
-            //if (rsa.PublicOnly)
-            //    throw new ArgumentException("No private key found in RSAParameters");
-
-            
-
-            //var publicRsaParameters = rsa.ExportParameters(true); //true returns public and private key, false only public
-            //var signature = rsa.Encrypt(bytes, false);
             var signature = new Signature()
             {
                 SignedHashedCommand = signedBytes,
@@ -45,7 +44,7 @@ namespace SawtoothClient.Tools
                 Command = command,
                 RsaParameters = publicRsaParameters,
                 Signature = signature,
-                HashAlgorithm = hashAlgorithm
+                HashAlgorithm = _hashAlgorithm
             };
         }
         private static byte[] ObjectToByteArray(object obj)
