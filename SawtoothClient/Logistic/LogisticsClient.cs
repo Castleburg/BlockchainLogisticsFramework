@@ -19,7 +19,7 @@ namespace SawtoothClient.Logistic
             _sawtoothClient = client;
         }
 
-        public BatchStatusResponse NewEntity(LogisticEnums.EntityType entityType, string creatorId)
+        public TransactionStatus NewEntity(LogisticEnums.EntityType entityType, string creatorId)
         {
             var newGuid = Guid.NewGuid();
             var info = new Info()
@@ -38,27 +38,36 @@ namespace SawtoothClient.Logistic
 
             var jsonCommand = JsonConvert.SerializeObject(command);
             var response = _sawtoothClient.PostBatch(jsonCommand);
-            if(response.StatusCode != HttpStatusCode.Accepted)
+            
+            if (response.StatusCode != HttpStatusCode.Accepted)
                 throw new HttpRequestException($"Message was not accepted! StatusCode: {response.StatusCode}, ReasonPhrase: {response.ReasonPhrase}");
 
-            var batchResponse = new BatchStatusResponse()
+            var content = response.Content.ReadAsStringAsync().Result;
+            var link = JsonConvert.DeserializeObject<BatchResponse>(content);
+            if(link is null)
+                throw new HttpRequestException($"Could not unpack content! StatusCode: {response.StatusCode}, Content: {content}");
+
+            var batchId = link.Link.Substring(link.Link.LastIndexOf('=') + 1);
+
+            var transactionStatus = new TransactionStatus()
             {
                 TransactionId = newGuid,
-                //BatchId = response.Content
+                BatchId = batchId,
+                Command = LogisticEnums.Commands.NewEntity,
+                Status = SawtoothEnums.BatchStatus.Unknown
             };
 
-            var batchStatus = _sawtoothClient.GetBatchStatuses("", 5);
-            if (batchStatus.StatusCode is HttpStatusCode.OK)
-            {
+            var batchStatus = _sawtoothClient.GetBatchStatuses(batchId, 10);
+            if (!(batchStatus.StatusCode is HttpStatusCode.OK)) return transactionStatus;
 
+            var batchContent = batchStatus.Content.ReadAsStringAsync().Result;
+            var batchStatusResponse = JsonConvert.DeserializeObject<BatchStatusResponse>(batchContent);
+            if (batchStatusResponse is null)
+                return transactionStatus;
 
-
-            }
-            else
-            {
-
-            }
-            return batchResponse;
+            var status = batchStatusResponse.Data[0].GetStatus();
+            transactionStatus.Status = status;
+            return transactionStatus;
         }
 
         public HttpResponseMessage AddEvent(Guid transactionId, LogisticEnums.EventType eventType, string jsonString)

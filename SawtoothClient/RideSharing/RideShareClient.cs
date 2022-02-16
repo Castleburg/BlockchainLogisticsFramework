@@ -19,7 +19,7 @@ namespace SawtoothClient.RideSharing
             _logisticClient = logisticClient;
         }
 
-        public List<BatchStatusResponse> StartRide(string companyId, string driverId, string location)
+        public List<TransactionStatus> StartRide(string companyId, string driverId, string location)
         {
             var entityGuid = _logisticClient.NewEntity(LogisticEnums.EntityType.RideShare, companyId);
             

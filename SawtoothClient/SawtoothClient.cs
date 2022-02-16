@@ -37,9 +37,9 @@ namespace SawtoothClient
         private readonly Sawtooth.Sdk.Client.Encoder _encoder;
 
         //Resource endpoints - getters
-        private readonly string _batches_resource_endpoint = "/batches/";
-        private readonly string _blocks_resource_endpoint = "/blocks/";
-        private readonly string _batch_statues_resource_endpoint = "/batch_statuses/";
+        private readonly string _batches_resource_endpoint = "/batches";
+        private readonly string _blocks_resource_endpoint = "/blocks";
+        private readonly string _batch_statues_resource_endpoint = "/batch_statuses";
 
         private readonly HttpClient _httpClient;
 
@@ -80,14 +80,14 @@ namespace SawtoothClient
             var builder = new StringBuilder();
             builder.Append(_address);
             builder.Append(_batches_resource_endpoint);
-            builder.Append("?head=");
-            builder.Append(head);
-            builder.Append("&start=");
-            builder.Append(start);
-            builder.Append("&limit=");
-            builder.Append(limit);
-            builder.Append("&reverse=");
-            builder.Append(reverse);
+            //builder.Append("?head=");
+            //builder.Append(head);
+            //builder.Append("&start=");
+            //builder.Append(start);
+            //builder.Append("&limit=");
+            //builder.Append(limit);
+            //builder.Append("&reverse=");
+           // builder.Append(reverse);
             var request = builder.ToString();
             return _httpClient.GetAsync(request).Result;
         }
