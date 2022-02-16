@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Net.Http;
 using Newtonsoft.Json;
 using SharedObjects.Commands;
 using SharedObjects.Enums;
 
-namespace SawtoothClient
+namespace SawtoothClient.Logistic
 {
     public class LogisticsClient
     {
@@ -18,8 +17,9 @@ namespace SawtoothClient
             _sawtoothClient = client;
         }
 
-        public void NewEntity(LogisticEnums.EntityType entityType, string creatorId)
+        public Guid NewEntity(LogisticEnums.EntityType entityType, string creatorId)
         {
+            var newGuid = Guid.NewGuid();
             var info = new Info()
             {
                 EntityType = entityType,
@@ -29,16 +29,17 @@ namespace SawtoothClient
             {
                 CommandType = LogisticEnums.Commands.NewEntity,
                 PublicKey = _publicKey,
-                TransactionId = Guid.NewGuid(),
+                TransactionId = newGuid,
                 Info = info,
                 TimeStamp = DateTime.Now
             };
 
             var jsonCommand = JsonConvert.SerializeObject(command);
-            _sawtoothClient.PostBatch(jsonCommand);
+            var response = _sawtoothClient.PostBatch(jsonCommand);
+            return newGuid;
         }
 
-        public void AddEvent(Guid transactionId, LogisticEnums.EventType eventType, string jsonString)
+        public HttpResponseMessage AddEvent(Guid transactionId, LogisticEnums.EventType eventType, string jsonString)
         {
             var info = new Info()
             {
@@ -54,10 +55,10 @@ namespace SawtoothClient
                 TimeStamp = DateTime.Now
             };
             var jsonCommand = JsonConvert.SerializeObject(command);
-            _sawtoothClient.PostBatch(jsonCommand);
+            return _sawtoothClient.PostBatch(jsonCommand);
         }
 
-        public void MakeFinal(Guid transactionId)
+        public HttpResponseMessage MakeFinal(Guid transactionId)
         {
             var info = new Info();
             var command = new Command()
@@ -69,10 +70,10 @@ namespace SawtoothClient
                 TimeStamp = DateTime.Now
             };
             var jsonCommand = JsonConvert.SerializeObject(command);
-            _sawtoothClient.PostBatch(jsonCommand);
+            return _sawtoothClient.PostBatch(jsonCommand);
         }
 
-        public void NewInvite(Guid transactionId, byte[] invitedPublicKey)
+        public HttpResponseMessage NewInvite(Guid transactionId, byte[] invitedPublicKey)
         {
             var info = new Info()
             {
@@ -87,10 +88,10 @@ namespace SawtoothClient
                 TimeStamp = DateTime.Now
             };
             var jsonCommand = JsonConvert.SerializeObject(command);
-            _sawtoothClient.PostBatch(jsonCommand);
+            return _sawtoothClient.PostBatch(jsonCommand);
         }
 
-        public void CancelInvite(Guid transactionId, byte[] invitedPublicKey)
+        public HttpResponseMessage CancelInvite(Guid transactionId, byte[] invitedPublicKey)
         {
             var info = new Info()
             {
@@ -105,10 +106,10 @@ namespace SawtoothClient
                 TimeStamp = DateTime.Now
             };
             var jsonCommand = JsonConvert.SerializeObject(command);
-            _sawtoothClient.PostBatch(jsonCommand);
+            return _sawtoothClient.PostBatch(jsonCommand);
         }
 
-        public void RejectInvite(Guid transactionId, byte[] invitedPublicKey)
+        public HttpResponseMessage RejectInvite(Guid transactionId, byte[] invitedPublicKey)
         {
             var info = new Info();
             var command = new Command()
@@ -120,10 +121,10 @@ namespace SawtoothClient
                 TimeStamp = DateTime.Now
             };
             var jsonCommand = JsonConvert.SerializeObject(command);
-            _sawtoothClient.PostBatch(jsonCommand);
+            return _sawtoothClient.PostBatch(jsonCommand);
         }
 
-        public void AcceptInvite(Guid transactionId, byte[] invitedPublicKey)
+        public HttpResponseMessage AcceptInvite(Guid transactionId, byte[] invitedPublicKey)
         {
             var info = new Info()
             {
@@ -138,7 +139,7 @@ namespace SawtoothClient
                 TimeStamp = DateTime.Now
             };
             var jsonCommand = JsonConvert.SerializeObject(command);
-            _sawtoothClient.PostBatch(jsonCommand);
+            return _sawtoothClient.PostBatch(jsonCommand);
         }
     }
 }

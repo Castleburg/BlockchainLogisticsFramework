@@ -1,25 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Text;
+using Newtonsoft.Json;
+using SawtoothClient.Logistic;
 using SharedObjects.Enums;
 using SharedObjects.RideShare;
 
 namespace SawtoothClient.RideSharing
 {
-    class RideShareClientCalls
+    public class RideShareClient : LogisticsClient
     {
-        public static RideShareStruct StartRide(string driverId, string location)
+        private ILogisticClient _logisticClient;
+
+        public RideShareClient(ILogisticClient logisticClient)
         {
+            _logisticClient = logisticClient;
+        }
+
+        public int StartRide(string companyId, string driverId, string location)
+        {
+            var entityGuid = _logisticClient.NewEntity(LogisticEnums.EntityType.RideShare, companyId);
+            
             var rideShareObj = new RideShareStruct
             {
                  DriverId = driverId,
                  Location = location
             };
+            var jsonCommand = JsonConvert.SerializeObject(rideShareObj);
 
-            return rideShareObj;
+            _logisticClient.AddEvent(entityGuid, LogisticEnums.EventType.StartRide, jsonCommand);
+
+            //Batch id(s)
+            return 0;
         }
 
-        public static RideShareStruct AddPassenger(string passengerId, string location)
+        public int AddPassenger(string passengerId, string location)
         {
             var rideShareObj = new RideShareStruct
             {
@@ -27,7 +43,11 @@ namespace SawtoothClient.RideSharing
                 Location = location,
                 PassengerId = passengerId
             };
-            return rideShareObj;
+
+            _logisticClient.AddEvent()
+
+            //Batch id(s)
+            return 0;
         }
 
         public static RideShareStruct RemovePassenger(string passengerId, string location)
