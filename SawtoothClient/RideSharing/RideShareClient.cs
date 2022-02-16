@@ -9,9 +9,9 @@ using SharedObjects.RideShare;
 
 namespace SawtoothClient.RideSharing
 {
-    public class RideShareClient : LogisticsClient
+    public class RideShareClient
     {
-        private ILogisticClient _logisticClient;
+        private readonly ILogisticClient _logisticClient;
 
         public RideShareClient(ILogisticClient logisticClient)
         {
@@ -44,7 +44,7 @@ namespace SawtoothClient.RideSharing
                 PassengerId = passengerId
             };
 
-            _logisticClient.AddEvent()
+            //_logisticClient.AddEvent();
 
             //Batch id(s)
             return 0;

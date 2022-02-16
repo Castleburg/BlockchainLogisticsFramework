@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TransactionProcessor", "Tra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManualTests", "ManualTests\ManualTests.csproj", "{8DBF00B1-1B2B-46C0-AC86-02B7C809DDD3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedObjects", "SharedObjects\SharedObjects.csproj", "{1DCCA319-60B6-47E9-A5D8-9A020FEDD71B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedObjects", "SharedObjects\SharedObjects.csproj", "{1DCCA319-60B6-47E9-A5D8-9A020FEDD71B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

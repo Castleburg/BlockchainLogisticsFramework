@@ -50,7 +50,7 @@ namespace TransactionProcessor.Process
                 PublicKey = command.PublicKey,
                 CreatorId = command.Info.Id,
                 TransactionId = command.TransactionId,
-                Events = new List<SharedObjects.Logistic.CustomEvent>(),
+                Events = new List<CustomEvent>(),
                 SignOff = new SignOff()
                 {
                     Invites = new List<Invite>(),
