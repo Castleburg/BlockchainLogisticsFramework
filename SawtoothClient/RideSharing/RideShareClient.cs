@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text;
 using Newtonsoft.Json;
 using SawtoothClient.Logistic;
+using SawtoothClient.Objects;
 using SharedObjects.Enums;
 using SharedObjects.RideShare;
 
@@ -18,7 +19,7 @@ namespace SawtoothClient.RideSharing
             _logisticClient = logisticClient;
         }
 
-        public int StartRide(string companyId, string driverId, string location)
+        public List<BatchStatusResponse> StartRide(string companyId, string driverId, string location)
         {
             var entityGuid = _logisticClient.NewEntity(LogisticEnums.EntityType.RideShare, companyId);
             
@@ -32,7 +33,7 @@ namespace SawtoothClient.RideSharing
             _logisticClient.AddEvent(entityGuid, LogisticEnums.EventType.StartRide, jsonCommand);
 
             //Batch id(s)
-            return 0;
+            return null;
         }
 
         public int AddPassenger(string passengerId, string location)

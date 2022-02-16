@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using Newtonsoft.Json;
+using SawtoothClient.Objects;
 using SharedObjects.Commands;
 using SharedObjects.Enums;
 
@@ -17,7 +19,7 @@ namespace SawtoothClient.Logistic
             _sawtoothClient = client;
         }
 
-        public Guid NewEntity(LogisticEnums.EntityType entityType, string creatorId)
+        public BatchStatusResponse NewEntity(LogisticEnums.EntityType entityType, string creatorId)
         {
             var newGuid = Guid.NewGuid();
             var info = new Info()
@@ -36,7 +38,27 @@ namespace SawtoothClient.Logistic
 
             var jsonCommand = JsonConvert.SerializeObject(command);
             var response = _sawtoothClient.PostBatch(jsonCommand);
-            return newGuid;
+            if(response.StatusCode != HttpStatusCode.Accepted)
+                throw new HttpRequestException($"Message was not accepted! StatusCode: {response.StatusCode}, ReasonPhrase: {response.ReasonPhrase}");
+
+            var batchResponse = new BatchStatusResponse()
+            {
+                TransactionId = newGuid,
+                //BatchId = response.Content
+            };
+
+            var batchStatus = _sawtoothClient.GetBatchStatuses("", 5);
+            if (batchStatus.StatusCode is HttpStatusCode.OK)
+            {
+
+
+
+            }
+            else
+            {
+
+            }
+            return batchResponse;
         }
 
         public HttpResponseMessage AddEvent(Guid transactionId, LogisticEnums.EventType eventType, string jsonString)
