@@ -12,28 +12,30 @@ namespace SawtoothClient.Logistic
 {
     public class LogisticsClient
     {
+        private readonly string _companyId;
         private readonly byte[] _publicKey;
         private readonly SawtoothClient _sawtoothClient;
         private readonly RsaEncryptionService _encryptionService;
 
-        public LogisticsClient(byte[] publicKey, SawtoothClient client, RsaEncryptionService encryptionService)
+        public LogisticsClient(byte[] publicKey, SawtoothClient client, RsaEncryptionService encryptionService, string companyId)
         {
             _publicKey = publicKey;
             _sawtoothClient = client;
             _encryptionService = encryptionService;
+            _companyId = companyId;
         }
 
-        public TransactionStatus NewEntity(LogisticEnums.EntityType entityType, string creatorId)
+        public TransactionStatus NewEntity(LogisticEnums.EntityType entityType)
         {
             var newGuid = Guid.NewGuid();
             var info = new Info()
             {
-                EntityType = entityType,
-                Id = creatorId
+                EntityType = entityType
             };
             var command = new Command()
             {
                 CommandType = LogisticEnums.Commands.NewEntity,
+                CompanyId = _companyId,
                 PublicKey = _publicKey,
                 TransactionId = newGuid,
                 Info = info,
@@ -87,6 +89,7 @@ namespace SawtoothClient.Logistic
             {
                 CommandType = LogisticEnums.Commands.AddEvent,
                 PublicKey = _publicKey,
+                CompanyId = _companyId,
                 TransactionId = transactionId,
                 Info = info,
                 TimeStamp = DateTime.Now
@@ -120,6 +123,7 @@ namespace SawtoothClient.Logistic
             {
                 CommandType = LogisticEnums.Commands.NewInvite,
                 PublicKey = _publicKey,
+                CompanyId = _companyId,
                 TransactionId = transactionId,
                 Info = info,
                 TimeStamp = DateTime.Now
@@ -138,6 +142,7 @@ namespace SawtoothClient.Logistic
             {
                 CommandType = LogisticEnums.Commands.CancelInvite,
                 PublicKey = _publicKey,
+                CompanyId = _companyId,
                 TransactionId = transactionId,
                 Info = info,
                 TimeStamp = DateTime.Now
@@ -153,6 +158,7 @@ namespace SawtoothClient.Logistic
             {
                 CommandType = LogisticEnums.Commands.RejectInvite,
                 PublicKey = _publicKey,
+                CompanyId = _companyId,
                 TransactionId = transactionId,
                 Info = info,
                 TimeStamp = DateTime.Now
@@ -171,6 +177,7 @@ namespace SawtoothClient.Logistic
             {
                 CommandType = LogisticEnums.Commands.AcceptInvite,
                 PublicKey = _publicKey,
+                CompanyId = _companyId,
                 TransactionId = transactionId,
                 Info = info,
                 TimeStamp = DateTime.Now

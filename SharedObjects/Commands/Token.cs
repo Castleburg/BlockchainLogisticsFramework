@@ -10,8 +10,6 @@ namespace SharedObjects.Commands
     public class Token
     {
         public Command Command { get; set; }
-        public Signature Signature { get; set; }
-        public RSAParameters RsaParameters { get; set; }
-        public string HashAlgorithm { get; set; }
+        public byte[] SignedCertificate { get; set; }
     }
 }

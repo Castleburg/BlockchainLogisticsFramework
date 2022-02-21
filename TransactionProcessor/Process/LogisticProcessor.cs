@@ -48,7 +48,7 @@ namespace TransactionProcessor.Process
             {
                 Type = command.Info.EntityType,
                 PublicKey = command.PublicKey,
-                CreatorId = command.Info.Id,
+                CreatorId = command.CompanyId,
                 TransactionId = command.TransactionId,
                 Events = new List<CustomEvent>(),
                 SignOff = new SignOff()
@@ -65,14 +65,10 @@ namespace TransactionProcessor.Process
 
         public Entity AddEvent(Command command, TransactionContext context)
         {
-            var state = GetState(command.TransactionId, context);
-            if (!state.Any())
-                throw new InvalidTransactionException(_entityNotCreatedMessage);
+            var entity = GetEntityFromState(command, context);
 
             if (command.Info.EventType == LogisticEnums.EventType.Undefined)
                 throw new InvalidTransactionException("EventType is undefined.");
-
-            var entity = UnpackByteString(state.First().Value);
 
             if (NotEntityCreator(command.PublicKey, entity))
                 throw new InvalidTransactionException(_unauthorized);
@@ -91,11 +87,8 @@ namespace TransactionProcessor.Process
 
         public Entity MakeFinal(Command command, TransactionContext context)
         {
-            var state = GetState(command.TransactionId, context);
-            if (!state.Any())
-                throw new InvalidTransactionException(_entityNotCreatedMessage);
+            var entity = GetEntityFromState(command, context);
 
-            var entity = UnpackByteString(state.First().Value);
             if (NotEntityCreator(command.PublicKey, entity))
                 throw new InvalidTransactionException(_unauthorized);
 
@@ -112,14 +105,10 @@ namespace TransactionProcessor.Process
 
         public Entity NewInvite(Command command, TransactionContext context)
         {
-            var state = GetState(command.TransactionId, context);
-            if (!state.Any())
-                throw new InvalidTransactionException(_entityNotCreatedMessage);
+            var entity = GetEntityFromState(command, context);
 
             if (command.Info.InvitePublicKey is null)
                 throw new InvalidTransactionException("Missing invited public key.");
-
-            var entity = UnpackByteString(state.First().Value);
             if (!entity.Final)
                 throw new InvalidTransactionException(_entityNotFinalMessage);
 
@@ -141,14 +130,10 @@ namespace TransactionProcessor.Process
 
         public Entity CancelInvite(Command command, TransactionContext context)
         {
-            var state = GetState(command.TransactionId, context);
-            if (!state.Any())
-                throw new InvalidTransactionException(_entityNotCreatedMessage);
+            var entity = GetEntityFromState(command, context);
 
             if (command.Info.InvitePublicKey is null)
                 throw new InvalidTransactionException("Missing invited public key.");
-
-            var entity = UnpackByteString(state.First().Value);
             if (NotEntityCreator(command.PublicKey, entity))
                 throw new InvalidTransactionException(_unauthorized);
 
@@ -174,11 +159,8 @@ namespace TransactionProcessor.Process
 
         public Entity RejectInvite(Command command, TransactionContext context)
         {
-            var state = GetState(command.TransactionId, context);
-            if (!state.Any())
-                throw new InvalidTransactionException(_entityNotCreatedMessage);
+            var entity = GetEntityFromState(command, context);
 
-            var entity = UnpackByteString(state.First().Value);
             if (!entity.Final)
                 throw new InvalidTransactionException(_entityNotFinalMessage);
 
@@ -201,11 +183,7 @@ namespace TransactionProcessor.Process
 
         public Entity AcceptInvite(Command command, TransactionContext context)
         {
-            var state = GetState(command.TransactionId, context);
-            if (!state.Any())
-                throw new InvalidTransactionException(_entityNotCreatedMessage);
-
-            var entity = UnpackByteString(state.First().Value);
+            var entity = GetEntityFromState(command, context);
             if (!entity.Final)
                 throw new InvalidTransactionException(_entityNotFinalMessage);
 
@@ -228,10 +206,18 @@ namespace TransactionProcessor.Process
                     x.InviteStatus = LogisticEnums.InviteStatus.Signed;
             });
 
-            var newSignatory = new Signatory(command.Info.Id, command.PublicKey, jsonInviteResponse, DateTime.Now);
+            var newSignatory = new Signatory(command.CompanyId, command.PublicKey, jsonInviteResponse, DateTime.Now);
 
             entity.SignOff.Signatories.Add(newSignatory);
             return entity;
+        }
+
+        public Entity GetEntityFromState(Command command, TransactionContext context)
+        {
+            var state = GetState(command.TransactionId, context);
+            if (!state.Any())
+                throw new InvalidTransactionException(_entityNotCreatedMessage);
+            return UnpackByteString(state.First().Value);
         }
 
         private Dictionary<string, ByteString> GetState(Guid transactionId, TransactionContext context) => context.GetStateAsync(new[] { GetAddress(transactionId) }).Result;

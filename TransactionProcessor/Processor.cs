@@ -1,4 +1,5 @@
 ﻿using System;
+using TransactionProcessor.Context;
 using TransactionProcessor.Handlers;
 using TransactionProcessor.Process;
 using TransactionProcessor.Process.BusinessProcesses;
@@ -23,9 +24,10 @@ namespace TransactionProcessor
             var businessProcess = new RideShareBusinessProcess();
             var logisticProcess = new LogisticProcessor("Test", businessProcess);
             var cryptoService = new RsaDecryptionService();
+            var certificateDb = new CertificateContext("");
 
             var processor = new Sawtooth.Sdk.Processor.TransactionProcessor(_validatorAddress);
-            processor.AddHandler(new LogisticHandler("Test", "1.0", logisticProcess, cryptoService));
+            processor.AddHandler(new LogisticHandler("Test", "1.0", logisticProcess, cryptoService, certificateDb));
             processor.Start();
 
             Console.CancelKeyPress += delegate { processor.Stop(); };

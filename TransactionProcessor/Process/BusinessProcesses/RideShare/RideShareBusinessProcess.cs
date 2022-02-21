@@ -64,7 +64,7 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
 
             var invalidLocation = string.IsNullOrEmpty(signatoryReward.Location);
             var noGrantedTime = signatoryReward.GrantedTime <= 0;
-            var tillTimeStampDoesNotExist = signatoryReward.ValidTill == new DateTime();
+            var tillTimeStampDoesNotExist = signatoryReward.ExpirationDate == new DateTime();
 
             if (invalidLocation || noGrantedTime || tillTimeStampDoesNotExist)
                 throw new InvalidTransactionException($"The JSON string provided to AcceptInvite had erroneous fields");

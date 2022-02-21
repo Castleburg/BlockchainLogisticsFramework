@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using SharedObjects.Commands;
 using SharedObjects.Enums;
 using SharedObjects.Logistic;
+using TransactionProcessor.Context;
 using TransactionProcessor.Process;
 using TransactionProcessor.Tools.Interfaces;
 
@@ -25,13 +26,15 @@ namespace TransactionProcessor.Handlers
 
         private readonly ILogisticProcessor _logisticProcess;
         private readonly ICryptographicService _cryptographicService;
+        private readonly CertificateContext _certificateDb;
 
-        public LogisticHandler(string familyName, string version, ILogisticProcessor logisticProcess, ICryptographicService cryptographicService)
+        public LogisticHandler(string familyName, string version, ILogisticProcessor logisticProcess, ICryptographicService cryptographicService, CertificateContext certificateDb)
         {
             FamilyName = familyName;
             Version = version;
             _logisticProcess = logisticProcess;
             _cryptographicService = cryptographicService;
+            _certificateDb = certificateDb;
         }
 
         public async Task ApplyAsync(TpProcessRequest request, TransactionContext context)
@@ -52,10 +55,24 @@ namespace TransactionProcessor.Handlers
 
                 if (token is null)
                     throw new InvalidTransactionException($"Token was null.");
+                
+                var companyId = token.Command.CompanyId;
+                if (companyId is null)
+                    throw new InvalidTransactionException($"CompanyId was null.");
 
-                if (!_cryptographicService.VerifySignature(token))
+                var certificate = _certificateDb.GetCertificate(companyId);
+                if (certificate is null)
+                    throw new InvalidTransactionException($"No certificate was found.");
+
+                if (!_cryptographicService.VerifySignature(token, certificate))
                     throw new InvalidTransactionException($"Digital Signature was invalid.");
 
+                if (token.Command.CommandType != LogisticEnums.Commands.NewEntity)
+                {
+                    var entity = _logisticProcess.GetEntityFromState(token.Command, context);
+                    if(token.Command.TimeStamp <= entity.LastModified)
+                        throw new InvalidTransactionException($"Command was from before the last update.");
+                }
                 await HandleRequest(token.Command, context);
             }
             catch
@@ -79,7 +96,6 @@ namespace TransactionProcessor.Handlers
 
                 _ => throw new InvalidTransactionException($"Unknown ActionType {command.CommandType}.")
             };
-            //TODO: Check response
             var response = await SaveState(command.TransactionId, entity, context);
         }
 
