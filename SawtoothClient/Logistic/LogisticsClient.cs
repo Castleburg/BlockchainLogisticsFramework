@@ -63,7 +63,7 @@ namespace SawtoothClient.Logistic
                 Status = SawtoothEnums.BatchStatus.Unknown
             };
 
-            var batchStatus = _sawtoothClient.GetBatchStatuses(batchId, 10);
+            var batchStatus = _sawtoothClient.GetBatchStatuses(batchId, 15);
             if (!(batchStatus.StatusCode is HttpStatusCode.OK)) return transactionStatus;
 
             var batchContent = batchStatus.Content.ReadAsStringAsync().Result;

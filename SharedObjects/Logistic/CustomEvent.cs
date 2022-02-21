@@ -18,5 +18,7 @@ namespace SharedObjects.Logistic
         public LogisticEnums.EventType Type { get; set; }
         public string JsonContainer { get; set; }
         public DateTime TimeStamp { get; set; }
+
+        //Make an unpack method
     }
 }
