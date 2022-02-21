@@ -40,7 +40,6 @@ namespace SawtoothClient.RideSharing
         {
             var rideShareObj = new RideShareStruct
             {
-                EventType = LogisticEnums.EventType.AddPassenger,
                 Location = location,
                 PassengerId = passengerId
             };
@@ -55,7 +54,6 @@ namespace SawtoothClient.RideSharing
         {
             var rideShareObj = new RideShareStruct
             {
-                EventType = LogisticEnums.EventType.RemovePassenger,
                 PassengerId = passengerId,
                 Location = location
             };
@@ -67,7 +65,6 @@ namespace SawtoothClient.RideSharing
         {
             var rideShareObj = new RideShareStruct
             {
-                EventType = LogisticEnums.EventType.CancelRide,
                 DriverId = driverId,
                 Location = location
             };
@@ -78,7 +75,6 @@ namespace SawtoothClient.RideSharing
         {
             var rideShareObj = new RideShareStruct
             {
-                EventType = LogisticEnums.EventType.UpdateRide,
                 Location = Location
             };
             return rideShareObj;
@@ -88,7 +84,6 @@ namespace SawtoothClient.RideSharing
         {
             var rideShareObj = new RideShareStruct
             {
-                EventType = LogisticEnums.EventType.StopRide,
                 DriverId = driverId,
                 Location = location
             };

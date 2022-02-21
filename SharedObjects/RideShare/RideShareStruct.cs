@@ -9,7 +9,6 @@ namespace SharedObjects.RideShare
     {
         public string DriverId { get; set; }
         public string Location { get; set; }
-        public LogisticEnums.EventType EventType { get; set; }
         public List<string> PassengerIdList { get; set; }
         public string PassengerId { get; set; }
         public RideShareEnums.RideStatus Status { get; set; }

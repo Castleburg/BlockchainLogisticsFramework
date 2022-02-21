@@ -9,7 +9,7 @@ namespace SharedObjects.RideShare
     public class RideShareSignatoryReward
     {
         public string Location { get; set; }
-        public DateTime From { get; set; }
-        public DateTime Till { get; set; }
+        public DateTime ValidTill { get; set; }
+        public int GrantedTime { get; set; } //Minutes
     }
 }

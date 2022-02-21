@@ -63,10 +63,10 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
             var signatoryReward = _rideHandler.GetSignatoryReward(jsonString);
 
             var invalidLocation = string.IsNullOrEmpty(signatoryReward.Location);
-            var fromTimeStampDoesNotExist = signatoryReward.From == new DateTime();
-            var tillTimeStampDoesNotExist = signatoryReward.Till == new DateTime();
+            var noGrantedTime = signatoryReward.GrantedTime <= 0;
+            var tillTimeStampDoesNotExist = signatoryReward.ValidTill == new DateTime();
 
-            if (invalidLocation || fromTimeStampDoesNotExist || tillTimeStampDoesNotExist)
+            if (invalidLocation || noGrantedTime || tillTimeStampDoesNotExist)
                 throw new InvalidTransactionException($"The JSON string provided to AcceptInvite had erroneous fields");
             return jsonString;
         }
