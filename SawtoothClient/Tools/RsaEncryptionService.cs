@@ -19,7 +19,7 @@ namespace SawtoothClient.Tools
             _hashAlgorithm = hashAlgorithm;
         }
 
-        public Token SignCommand(Command command)
+        public Token AddSignature(Command command, byte[] certificate)
         {
 
             var rsa = RSA.Create();
@@ -28,31 +28,13 @@ namespace SawtoothClient.Tools
             var rsaFormatter = new RSAPKCS1SignatureFormatter(rsa);
             rsaFormatter.SetHashAlgorithm(_hashAlgorithm);
 
-            command.PublicKey = rsa.ExportRSAPublicKey();
+            var signedBytes = rsaFormatter.CreateSignature(certificate);
 
-            var bytes = ObjectToByteArray(command);
-            var signedBytes = rsaFormatter.CreateSignature(bytes);
-            var publicRsaParameters = rsa.ExportParameters(false); //true returns public and private key, false only public
-
-            var signature = new Signature()
-            {
-                SignedHashedCommand = signedBytes,
-                HashedCommand = bytes
-            };
             return new Token()
             {
                 Command = command,
-                RsaParameters = publicRsaParameters,
-                Signature = signature,
-                HashAlgorithm = _hashAlgorithm
+                SignedCertificate = signedBytes
             };
-        }
-        private static byte[] ObjectToByteArray(object obj)
-        {
-            var jsonString = JsonConvert.SerializeObject(obj);
-            using var sha256Hash = SHA256.Create();
-            var bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(jsonString));
-            return bytes;
         }
     }
 }

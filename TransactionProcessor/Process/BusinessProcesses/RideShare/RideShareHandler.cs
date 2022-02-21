@@ -22,7 +22,6 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
             {
                 DriverId = latestRideShare.DriverId,
                 Location = rideShare.Location,
-                EventType = LogisticEnums.EventType.StopRide,
                 PassengerIdList = latestRideShare.PassengerIdList,
                 Status = RideShareEnums.RideStatus.Finished
             };
@@ -48,7 +47,6 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
             {
                 DriverId = latestRideShare.DriverId,
                 Location = rideShareObj.Location,
-                EventType = LogisticEnums.EventType.AddPassenger,
                 PassengerIdList = latestRideShare.PassengerIdList,
                 Status = latestRideShare.Status
             };
@@ -71,7 +69,6 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
             {
                 DriverId = latestRideShare.DriverId,
                 Location = rideShareObj.Location,
-                EventType = LogisticEnums.EventType.RemovePassenger,
                 PassengerIdList = latestRideShare.PassengerIdList,
                 Status = latestRideShare.Status
             };
@@ -94,7 +91,6 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
             {
                 DriverId = latestRideShare.DriverId,
                 Location = latestRideShare.Location,
-                EventType = LogisticEnums.EventType.CancelRide,
                 PassengerIdList = latestRideShare.PassengerIdList,
                 Status = RideShareEnums.RideStatus.Cancelled
             };
@@ -114,7 +110,6 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
             {
                 DriverId = rideShareObj.DriverId,
                 Location = rideShareObj.Location,
-                EventType = LogisticEnums.EventType.StartRide,
                 PassengerIdList = new List<string>(),
                 Status = RideShareEnums.RideStatus.Ongoing
             };
@@ -134,7 +129,6 @@ namespace TransactionProcessor.Process.BusinessProcesses.RideShare
             {
                 DriverId = latestRideShare.DriverId,
                 Location = rideShareObj.Location,
-                EventType = LogisticEnums.EventType.UpdateRide,
                 PassengerIdList = latestRideShare.PassengerIdList,
                 Status = latestRideShare.Status
             };
