@@ -20,7 +20,7 @@ namespace SawtoothClient.Tools
 
         public Token AddSignature(Command command)
         {
-            command.PublicKey = _cryptoService.ExportRSAPrivateKey();
+            command.PublicKey = _cryptoService.ExportRSAPrivateKey(); //Used for signing, so terminology is flipped
             var sig = new SignatureInfo()
             {
                 CommandType = command.CommandType,

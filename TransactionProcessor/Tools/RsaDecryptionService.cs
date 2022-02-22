@@ -17,7 +17,7 @@ namespace TransactionProcessor.Tools
             try
             {
                 var cryptoService = new RSACryptoServiceProvider();
-                cryptoService.ImportRSAPrivateKey(token.Command.PublicKey, out _);
+                cryptoService.ImportRSAPrivateKey(token.Command.PublicKey, out _); //Used for signing, so terminology is flipped
 
                 var bytes = cryptoService.Decrypt(token.SignedInfo, true);
                 var plaintext = Encoding.UTF8.GetString(bytes);
