@@ -28,13 +28,10 @@ namespace SawtoothClient.Tools
                 TransactionId = command.TransactionId
             };
 
-
             var jsonCommand = JsonConvert.SerializeObject(sig);
             var data = Encoding.UTF8.GetBytes(jsonCommand);
 
-            if(data.Length > 245)
-                throw new ArgumentException("Too much data");
-
+            //Use at keys with a length of at least 2048
             var cipherText = _cryptoService.Encrypt(data, true);
 
             return new Token()
