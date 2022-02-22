@@ -14,15 +14,13 @@ namespace SawtoothClient.Logistic
     {
         private readonly string _companyId;
         private readonly byte[] _publicKey;
-        private readonly byte[] _certificate;
         private readonly SawtoothClient _sawtoothClient;
         private readonly RsaEncryptionService _encryptionService;
 
-        public LogisticsClient(string companyId, byte[] publicKey, byte[] certificate, SawtoothClient client, RsaEncryptionService encryptionService)
+        public LogisticsClient(string companyId, byte[] publicKey, SawtoothClient client, RsaEncryptionService encryptionService)
         {
             _publicKey = publicKey;
             _companyId = companyId;
-            _certificate = certificate;
             _sawtoothClient = client;
             _encryptionService = encryptionService;
         }
@@ -44,7 +42,7 @@ namespace SawtoothClient.Logistic
                 TimeStamp = DateTime.Now
             };
 
-            var token = _encryptionService.AddSignature(command, _certificate);
+            var token = _encryptionService.AddSignature(command);
 
             var jsonToken = JsonConvert.SerializeObject(token);
             var response = _sawtoothClient.PostBatch(jsonToken);

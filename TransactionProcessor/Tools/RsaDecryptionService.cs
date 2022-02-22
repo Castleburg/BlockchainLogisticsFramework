@@ -1,35 +1,41 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
-using Org.BouncyCastle.Crypto.Tls;
 using Sawtooth.Sdk.Processor;
 using SharedObjects.Commands;
-using TransactionProcessor.Context;
 using TransactionProcessor.Tools.Interfaces;
 
 namespace TransactionProcessor.Tools
 {
     public class RsaDecryptionService : ICryptographicService
     {
-        public bool VerifySignature(Token token, CustomCertificate certificate)
+
+        public bool VerifyToken(Token token)
         {
             try
             {
-                var rsa = RSA.Create();
-                rsa.ImportSubjectPublicKeyInfo(certificate.PublicKey, out _);
+                var cryptoService = new RSACryptoServiceProvider();
+                cryptoService.ImportRSAPrivateKey(token.Command.PublicKey, out _);
 
-                var rsaDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
-                rsaDeformatter.SetHashAlgorithm(certificate.HashAlgorithm);
+                var bytes = cryptoService.Decrypt(token.SignedInfo, true);
+                var plaintext = Encoding.UTF8.GetString(bytes);
+                var sigInfo = JsonConvert.DeserializeObject<SignatureInfo>(plaintext);
+                if(sigInfo is null)
+                    throw new InvalidTransactionException("No signed command was provided in token");
 
-                return rsaDeformatter.VerifySignature(certificate.Signature,
-                           token.SignedCertificate) &&
-                       certificate.PublicKey.SequenceEqual(token.Command.PublicKey);
+                return sigInfo.CommandType == token.Command.CommandType &&
+                    sigInfo.TimeStamp == token.Command.TimeStamp &&
+                    sigInfo.TransactionId.Equals(token.Command.TransactionId);
             }
-            catch
+            catch (JsonSerializationException)
             {
+                throw new InvalidTransactionException("Failed to deserialize command");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("VerifySignature failed due to an exception: " + e);
                 return false;
             }
         }

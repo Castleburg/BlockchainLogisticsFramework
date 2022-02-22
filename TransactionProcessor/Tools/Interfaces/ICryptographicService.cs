@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using SharedObjects.Commands;
-using TransactionProcessor.Context;
+﻿using SharedObjects.Commands;
 
 namespace TransactionProcessor.Tools.Interfaces
 {
     internal interface ICryptographicService
     {
-        bool VerifySignature(Token token, CustomCertificate certificate);
+        bool VerifyToken(Token token);
     }
 }

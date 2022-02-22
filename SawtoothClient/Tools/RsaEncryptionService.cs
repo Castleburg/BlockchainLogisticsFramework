@@ -10,30 +10,37 @@ namespace SawtoothClient.Tools
 {
     public class RsaEncryptionService
     {
-        private readonly RSAParameters _privateRsaParameters;
-        private readonly string _hashAlgorithm;
+        private readonly RSACryptoServiceProvider _cryptoService;
 
-        public RsaEncryptionService(RSAParameters privateRsaParameters, string hashAlgorithm = "SHA256")
+        public RsaEncryptionService(RSAParameters privateRsaParameters)
         {
-            _privateRsaParameters = privateRsaParameters;
-            _hashAlgorithm = hashAlgorithm;
+            _cryptoService = new RSACryptoServiceProvider();
+            _cryptoService.ImportParameters(privateRsaParameters);
         }
 
-        public Token AddSignature(Command command, byte[] certificate)
+        public Token AddSignature(Command command)
         {
+            command.PublicKey = _cryptoService.ExportRSAPrivateKey();
+            var sig = new SignatureInfo()
+            {
+                CommandType = command.CommandType,
+                TimeStamp = command.TimeStamp,
+                TransactionId = command.TransactionId
+            };
 
-            var rsa = RSA.Create();
-            rsa.ImportParameters(_privateRsaParameters);
 
-            var rsaFormatter = new RSAPKCS1SignatureFormatter(rsa);
-            rsaFormatter.SetHashAlgorithm(_hashAlgorithm);
+            var jsonCommand = JsonConvert.SerializeObject(sig);
+            var data = Encoding.UTF8.GetBytes(jsonCommand);
 
-            var signedBytes = rsaFormatter.CreateSignature(certificate);
+            if(data.Length > 245)
+                throw new ArgumentException("Too much data");
+
+            var cipherText = _cryptoService.Encrypt(data, true);
 
             return new Token()
             {
                 Command = command,
-                SignedCertificate = signedBytes
+                SignedInfo = cipherText
             };
         }
     }

@@ -10,6 +10,6 @@ namespace SharedObjects.Commands
     public class Token
     {
         public Command Command { get; set; }
-        public byte[] SignedCertificate { get; set; }
+        public byte[] SignedInfo { get; set; }
     }
 }
