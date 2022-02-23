@@ -2,9 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
-using Org.BouncyCastle.Asn1.Esf;
 using SharedObjects.Commands;
-using SharedObjects.Logistic;
 
 namespace SawtoothClient.Tools
 {
@@ -18,8 +16,9 @@ namespace SawtoothClient.Tools
         {
             _cryptoService = new RSACng();
             _cryptoService.ImportParameters(privateRsaParameters);
-
-            if(_cryptoService.KeySize % 8 != 0)
+            if (_cryptoService.KeySize < 2048)
+                throw new ArgumentException("Key size must be higher than 2048 bits");
+            if (_cryptoService.KeySize % 8 != 0)
                 throw new ArgumentException("Key size must be a multiple of 8");
         }
 
