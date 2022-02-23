@@ -10,7 +10,7 @@ namespace SawtoothClient.Tools
     {
         private readonly RSACng _cryptoService;
         private static int Sha256Bits => 256;
-        private int MaximumAllowedBytes => (_cryptoService.KeySize / 8) - (2 * Sha256Bits / 8) - 2; //With OAEP SHA1
+        private int MaximumAllowedBytes => (_cryptoService.KeySize / 8) - (2 * Sha256Bits / 8) - 2; //OAEP
 
         public RsaEncryptionService(RSAParameters privateRsaParameters)
         {
