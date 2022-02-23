@@ -8,6 +8,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="PeterO.Cbor" Version="4.4.4" />
     <PackageReference Include="Sawtooth.Sdk" Version="1.0.14" />
+    <PackageReference Include="System.Security.Cryptography.Cng" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

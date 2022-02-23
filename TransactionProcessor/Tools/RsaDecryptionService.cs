@@ -16,10 +16,10 @@ namespace TransactionProcessor.Tools
         {
             try
             {
-                var cryptoService = new RSACryptoServiceProvider();
+                var cryptoService = new RSACng();
                 cryptoService.ImportRSAPrivateKey(token.Command.PublicKey, out _); //Used for signing, so terminology is flipped
 
-                var bytes = cryptoService.Decrypt(token.SignedInfo, true);
+                var bytes = cryptoService.Decrypt(token.SignedInfo, RSAEncryptionPadding.OaepSHA256);
                 var plaintext = Encoding.UTF8.GetString(bytes);
                 var sigInfo = JsonConvert.DeserializeObject<SignatureInfo>(plaintext);
                 if(sigInfo is null)

@@ -10,13 +10,16 @@ namespace SawtoothClient.Tools
 {
     public class RsaEncryptionService
     {
-        private readonly RSACryptoServiceProvider _cryptoService;
-        private int MaximumAllowedBytes => ((_cryptoService.KeySize - 384) / 8) + 7; //With fOAEP
+        private readonly RSACng _cryptoService;
+        private int MaximumAllowedBytes => (_cryptoService.KeySize / 8) - (2*160/8) - 2; //With OAEP SHA1
 
         public RsaEncryptionService(RSAParameters privateRsaParameters)
         {
-            _cryptoService = new RSACryptoServiceProvider();
+            _cryptoService = new RSACng();
             _cryptoService.ImportParameters(privateRsaParameters);
+
+            if(_cryptoService.KeySize % 8 != 0)
+                throw new ArgumentException("Key size must be a multiple of 8");
         }
 
         public Token AddSignature(Command command)
@@ -32,11 +35,10 @@ namespace SawtoothClient.Tools
             var jsonCommand = JsonConvert.SerializeObject(sig);
             var data = Encoding.UTF8.GetBytes(jsonCommand);
 
-            //
-            if(data.Length > MaximumAllowedBytes)
+            if (data.Length > MaximumAllowedBytes)
                 throw new ArgumentException($"Too much data to sign, limit is {MaximumAllowedBytes} bytes using current key-size");
 
-            var cipherText = _cryptoService.Encrypt(data, true);
+            var cipherText = _cryptoService.Encrypt(data, RSAEncryptionPadding.OaepSHA256);
 
             return new Token()
             {
