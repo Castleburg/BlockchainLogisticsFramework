@@ -14,7 +14,7 @@ namespace SawtoothClient.Logistic
         TransactionStatus MakeFinal(Guid transactionId);
         TransactionStatus NewInvite(Guid transactionId, byte[] invitedPublicKey);
         TransactionStatus CancelInvite(Guid transactionId, byte[] invitedPublicKey);
-        TransactionStatus RejectInvite(Guid transactionId, byte[] invitedPublicKey);
+        TransactionStatus RejectInvite(Guid transactionId);
         TransactionStatus AcceptInvite(Guid transactionId, string jsonString);
     }
 }

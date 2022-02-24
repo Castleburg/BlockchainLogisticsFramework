@@ -112,7 +112,7 @@ namespace SawtoothClient.Logistic
             return ExecuteBatch(command);
         }
 
-        public TransactionStatus RejectInvite(Guid transactionId, byte[] invitedPublicKey)
+        public TransactionStatus RejectInvite(Guid transactionId)
         {
             var info = new Info();
             var command = new Command()
