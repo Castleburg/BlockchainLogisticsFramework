@@ -41,25 +41,130 @@ namespace SawtoothClient.Logistic
                 Info = info,
                 TimeStamp = DateTime.Now
             };
+            return ExecuteBatch(command);
+        }
 
+        public TransactionStatus AddEvent(Guid transactionId, LogisticEnums.EventType eventType, string jsonString)
+        {
+            var info = new Info()
+            {
+                EventType = eventType,
+                JsonContainer = jsonString
+            };
+            var command = new Command()
+            {
+                CommandType = LogisticEnums.Commands.AddEvent,
+                PublicKey = _publicKey,
+                CompanyId = _companyId,
+                TransactionId = transactionId,
+                Info = info,
+                TimeStamp = DateTime.Now
+            };
+            return ExecuteBatch(command);
+        }
+
+        public TransactionStatus MakeFinal(Guid transactionId)
+        {
+            var info = new Info();
+            var command = new Command()
+            {
+                CommandType = LogisticEnums.Commands.MakeFinal,
+                PublicKey = _publicKey,
+                TransactionId = transactionId,
+                Info = info,
+                TimeStamp = DateTime.Now
+            };
+            return ExecuteBatch(command);
+        }
+
+        public TransactionStatus NewInvite(Guid transactionId, byte[] invitedPublicKey)
+        {
+            var info = new Info()
+            {
+                InvitePublicKey = invitedPublicKey
+            };
+            var command = new Command()
+            {
+                CommandType = LogisticEnums.Commands.NewInvite,
+                PublicKey = _publicKey,
+                CompanyId = _companyId,
+                TransactionId = transactionId,
+                Info = info,
+                TimeStamp = DateTime.Now
+            };
+            return ExecuteBatch(command);
+        }
+
+        public TransactionStatus CancelInvite(Guid transactionId, byte[] invitedPublicKey)
+        {
+            var info = new Info()
+            {
+                InvitePublicKey = invitedPublicKey
+            };
+            var command = new Command()
+            {
+                CommandType = LogisticEnums.Commands.CancelInvite,
+                PublicKey = _publicKey,
+                CompanyId = _companyId,
+                TransactionId = transactionId,
+                Info = info,
+                TimeStamp = DateTime.Now
+            };
+            return ExecuteBatch(command);
+        }
+
+        public TransactionStatus RejectInvite(Guid transactionId, byte[] invitedPublicKey)
+        {
+            var info = new Info();
+            var command = new Command()
+            {
+                CommandType = LogisticEnums.Commands.RejectInvite,
+                PublicKey = _publicKey,
+                CompanyId = _companyId,
+                TransactionId = transactionId,
+                Info = info,
+                TimeStamp = DateTime.Now
+            };
+            return ExecuteBatch(command);
+        }
+
+        public TransactionStatus AcceptInvite(Guid transactionId, string jsonString)
+        {
+            var info = new Info()
+            {
+                JsonContainer = jsonString
+            };
+            var command = new Command()
+            {
+                CommandType = LogisticEnums.Commands.AcceptInvite,
+                PublicKey = _publicKey,
+                CompanyId = _companyId,
+                TransactionId = transactionId,
+                Info = info,
+                TimeStamp = DateTime.Now
+            };
+            return ExecuteBatch(command);
+        }
+
+        private TransactionStatus ExecuteBatch(Command command)
+        {
             var token = _encryptionService.AddSignature(command);
-
             var jsonToken = JsonConvert.SerializeObject(token);
             var response = _sawtoothClient.PostBatch(jsonToken);
-            
+
             if (response.StatusCode != HttpStatusCode.Accepted)
                 throw new HttpRequestException($"Message was not accepted! StatusCode: {response.StatusCode}, ReasonPhrase: {response.ReasonPhrase}");
 
             var content = response.Content.ReadAsStringAsync().Result;
             var link = JsonConvert.DeserializeObject<BatchResponse>(content);
-            if(link is null)
+            if (link is null)
                 throw new HttpRequestException($"Could not unpack content! StatusCode: {response.StatusCode}, Content: {content}");
 
             var batchId = link.Link.Substring(link.Link.LastIndexOf('=') + 1);
 
             var transactionStatus = new TransactionStatus()
             {
-                TransactionId = newGuid,
+                TransactionId = token.Command.TransactionId,
                 BatchId = batchId,
                 Command = LogisticEnums.Commands.NewEntity,
                 Status = SawtoothEnums.BatchStatus.Unknown
@@ -77,114 +182,5 @@ namespace SawtoothClient.Logistic
             transactionStatus.Status = status;
             return transactionStatus;
         }
-
-        public HttpResponseMessage AddEvent(Guid transactionId, LogisticEnums.EventType eventType, string jsonString)
-        {
-            var info = new Info()
-            {
-                EventType = eventType,
-                JsonContainer = jsonString
-            };
-            var command = new Command()
-            {
-                CommandType = LogisticEnums.Commands.AddEvent,
-                PublicKey = _publicKey,
-                CompanyId = _companyId,
-                TransactionId = transactionId,
-                Info = info,
-                TimeStamp = DateTime.Now
-            };
-            var jsonCommand = JsonConvert.SerializeObject(command);
-            return _sawtoothClient.PostBatch(jsonCommand);
-        }
-
-        public HttpResponseMessage MakeFinal(Guid transactionId)
-        {
-            var info = new Info();
-            var command = new Command()
-            {
-                CommandType = LogisticEnums.Commands.MakeFinal,
-                PublicKey = _publicKey,
-                TransactionId = transactionId,
-                Info = info,
-                TimeStamp = DateTime.Now
-            };
-            var jsonCommand = JsonConvert.SerializeObject(command);
-            return _sawtoothClient.PostBatch(jsonCommand);
-        }
-
-        public HttpResponseMessage NewInvite(Guid transactionId, byte[] invitedPublicKey)
-        {
-            var info = new Info()
-            {
-                InvitePublicKey = invitedPublicKey
-            };
-            var command = new Command()
-            {
-                CommandType = LogisticEnums.Commands.NewInvite,
-                PublicKey = _publicKey,
-                CompanyId = _companyId,
-                TransactionId = transactionId,
-                Info = info,
-                TimeStamp = DateTime.Now
-            };
-            var jsonCommand = JsonConvert.SerializeObject(command);
-            return _sawtoothClient.PostBatch(jsonCommand);
-        }
-
-        public HttpResponseMessage CancelInvite(Guid transactionId, byte[] invitedPublicKey)
-        {
-            var info = new Info()
-            {
-                InvitePublicKey = invitedPublicKey
-            };
-            var command = new Command()
-            {
-                CommandType = LogisticEnums.Commands.CancelInvite,
-                PublicKey = _publicKey,
-                CompanyId = _companyId,
-                TransactionId = transactionId,
-                Info = info,
-                TimeStamp = DateTime.Now
-            };
-            var jsonCommand = JsonConvert.SerializeObject(command);
-            return _sawtoothClient.PostBatch(jsonCommand);
-        }
-
-        public HttpResponseMessage RejectInvite(Guid transactionId, byte[] invitedPublicKey)
-        {
-            var info = new Info();
-            var command = new Command()
-            {
-                CommandType = LogisticEnums.Commands.RejectInvite,
-                PublicKey = _publicKey,
-                CompanyId = _companyId,
-                TransactionId = transactionId,
-                Info = info,
-                TimeStamp = DateTime.Now
-            };
-            var jsonCommand = JsonConvert.SerializeObject(command);
-            return _sawtoothClient.PostBatch(jsonCommand);
-        }
-
-        public HttpResponseMessage AcceptInvite(Guid transactionId, byte[] invitedPublicKey)
-        {
-            var info = new Info()
-            {
-                InvitePublicKey = invitedPublicKey
-            };
-            var command = new Command()
-            {
-                CommandType = LogisticEnums.Commands.AcceptInvite,
-                PublicKey = _publicKey,
-                CompanyId = _companyId,
-                TransactionId = transactionId,
-                Info = info,
-                TimeStamp = DateTime.Now
-            };
-            var jsonCommand = JsonConvert.SerializeObject(command);
-            return _sawtoothClient.PostBatch(jsonCommand);
-        }
-
     }
 }
