@@ -19,75 +19,84 @@ namespace SawtoothClient.RideSharing
             _logisticClient = logisticClient;
         }
 
-        public List<TransactionStatus> StartRide(string companyId, string driverId, string location)
+        public List<TransactionStatus> StartRide(string driverId, string location)
         {
-            var entityGuid = _logisticClient.NewEntity(LogisticEnums.EntityType.RideShare, companyId);
+            var entityStatus = _logisticClient.NewEntity(LogisticEnums.EntityType.RideShare);
             
             var rideShareObj = new RideShareStruct
             {
                  DriverId = driverId,
                  Location = location
             };
-            var jsonCommand = JsonConvert.SerializeObject(rideShareObj);
+            var json = JsonConvert.SerializeObject(rideShareObj);
 
-            _logisticClient.AddEvent(entityGuid, LogisticEnums.EventType.StartRide, jsonCommand);
-
-            //Batch id(s)
-            return null;
+            var eventStatus = _logisticClient.AddEvent(entityStatus.TransactionId, LogisticEnums.EventType.StartRide, json);
+            var status = new List<TransactionStatus>{ entityStatus, eventStatus };
+            return status;
         }
 
-        public int AddPassenger(string passengerId, string location)
+        public TransactionStatus AddPassenger(string passengerId, string location, Guid transactionId)
         {
             var rideShareObj = new RideShareStruct
             {
                 Location = location,
                 PassengerId = passengerId
             };
+            var json = JsonConvert.SerializeObject(rideShareObj);
+            var eventStatus = _logisticClient.AddEvent(transactionId, LogisticEnums.EventType.StartRide, json);
 
-            //_logisticClient.AddEvent();
-
-            //Batch id(s)
-            return 0;
+            return eventStatus;
         }
 
-        public static RideShareStruct RemovePassenger(string passengerId, string location)
+        public TransactionStatus RemovePassenger(string passengerId, string location, Guid transactionId)
         {
             var rideShareObj = new RideShareStruct
             {
                 PassengerId = passengerId,
                 Location = location
             };
+            var json = JsonConvert.SerializeObject(rideShareObj);
+            var eventStatus = _logisticClient.AddEvent(transactionId, LogisticEnums.EventType.StartRide, json);
 
-            return rideShareObj;
+            return eventStatus;
         }
 
-        public static RideShareStruct CancelRide(string driverId, string location)
+        public TransactionStatus CancelRide(string driverId, string location, Guid transactionId)
         {
             var rideShareObj = new RideShareStruct
             {
                 DriverId = driverId,
                 Location = location
             };
-            return rideShareObj;
+            var json = JsonConvert.SerializeObject(rideShareObj);
+            var eventStatus = _logisticClient.AddEvent(transactionId, LogisticEnums.EventType.StartRide, json);
+
+            return eventStatus;
         }
 
-        public static RideShareStruct UpdateRide(string Location)
+        public TransactionStatus UpdateRide(string location, Guid transactionId)
         {
             var rideShareObj = new RideShareStruct
             {
-                Location = Location
+                Location = location
             };
-            return rideShareObj;
+            var json = JsonConvert.SerializeObject(rideShareObj);
+            var eventStatus = _logisticClient.AddEvent(transactionId, LogisticEnums.EventType.StartRide, json);
+
+            return eventStatus;
         }
 
-        public static RideShareStruct StopRide(string driverId, string location)
+        public TransactionStatus StopRide(string driverId, string location, Guid transactionId)
         {
             var rideShareObj = new RideShareStruct
             {
                 DriverId = driverId,
                 Location = location
             };
-            return rideShareObj;
+            var json = JsonConvert.SerializeObject(rideShareObj);
+            var eventStatus = _logisticClient.AddEvent(transactionId, LogisticEnums.EventType.StartRide, json);
+
+            return eventStatus;
         }
 
     }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography;
 using Newtonsoft.Json;
 using SawtoothClient.Objects;
 using SawtoothClient.Tools;
