@@ -9,7 +9,7 @@ using SharedObjects.Enums;
 
 namespace SawtoothClient.Logistic
 {
-    public class LogisticsClient
+    public class LogisticsClient : ILogisticClient
     {
         private readonly string _companyId;
         private readonly byte[] _publicKey;

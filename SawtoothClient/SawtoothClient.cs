@@ -87,7 +87,7 @@ namespace SawtoothClient
             //builder.Append("&limit=");
             //builder.Append(limit);
             //builder.Append("&reverse=");
-           // builder.Append(reverse);
+            //builder.Append(reverse);
             var request = builder.ToString();
             return _httpClient.GetAsync(request).Result;
         }

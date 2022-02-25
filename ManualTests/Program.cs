@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using SawtoothClient;
 using SawtoothClient.Logistic;
 using SawtoothClient.Objects;
+using SawtoothClient.RideSharing;
 using SawtoothClient.Tools;
 using SharedObjects.Commands;
 using SharedObjects.Enums;
@@ -45,15 +46,15 @@ namespace ManualTests
 
 
             var enc = new RsaEncryptionService(param);
-            var token = enc.AddSignature(command);
+            //var token = enc.AddSignature(command);
 
-            var dec = new RsaDecryptionService();
-            var verified = dec.VerifyToken(token);
+            //var dec = new RsaDecryptionService();
+            //var verified = dec.VerifyToken(token);
 
-            //var lc = new LogisticsClient(rsa.ExportRSAPublicKey(), client, enc);
-            //var response = lc.NewEntity(LogisticEnums.EntityType.RideShare, "HelloMe");
+            var lc = new LogisticsClient("HelloWorld", publicKey, client, enc);
+            var response = lc.NewEntity(LogisticEnums.EntityType.RideShare);
 
-
+            //var rc = new RideShareClient(lc);
 
             //var batchStatus = client.GetBatchStatuses("d4f1a2f9dfed0fb2bef43cfa5812d8faec4fe8838eb3ea398505ad0e81b4f8f203e688e090de3fe9647c4124723a1abe9c0b24f5b5a6692a3da632b28c9a5063", 1);
             //var batchContent = batchStatus.Content.ReadAsStringAsync().Result;
