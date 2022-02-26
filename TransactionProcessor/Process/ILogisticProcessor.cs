@@ -14,6 +14,6 @@ namespace TransactionProcessor.Process
         Entity CancelInvite(Command command, TransactionContext context);
         Entity RejectInvite(Command command, TransactionContext context);
         Entity AcceptInvite(Command command, TransactionContext context);
-        Entity GetEntityFromState(Guid transactionId);
+        Entity GetEntityFromState(Command command);
     }
 }

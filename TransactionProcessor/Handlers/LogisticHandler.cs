@@ -62,7 +62,7 @@ namespace TransactionProcessor.Handlers
 
                 if (token.Command.CommandType != LogisticEnums.Commands.NewEntity)
                 {
-                    var entity = _logisticProcess.GetEntityFromState(token.Command.TransactionId);
+                    var entity = _logisticProcess.GetEntityFromState(token.Command);
                     if(token.Command.TimeStamp <= entity.LastModified)
                         throw new InvalidTransactionException($"Command was from before the last update.");
                 }

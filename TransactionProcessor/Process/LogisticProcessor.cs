@@ -43,7 +43,7 @@ namespace TransactionProcessor.Process
 
         public Entity NewEntity(Command command, TransactionContext context)
         {
-            var state = GetEntityFromState(command.TransactionId);
+            var state = GetEntityFromState(command);
             if (state is null)
                 throw new InvalidTransactionException("Address already in use.");
 
@@ -71,7 +71,7 @@ namespace TransactionProcessor.Process
 
         public Entity AddEvent(Command command, TransactionContext context)
         {
-            var entity = GetEntityFromState(command.TransactionId);
+            var entity = GetEntityFromState(command);
 
             if (command.Info.EventType == LogisticEnums.EventType.Undefined)
                 throw new InvalidTransactionException("EventType is undefined.");
@@ -94,7 +94,7 @@ namespace TransactionProcessor.Process
 
         public Entity MakeFinal(Command command, TransactionContext context)
         {
-            var entity = GetEntityFromState(command.TransactionId);
+            var entity = GetEntityFromState(command);
 
             if (NotEntityCreator(command.PublicKey, entity))
                 throw new InvalidTransactionException(_unauthorized);
@@ -113,7 +113,7 @@ namespace TransactionProcessor.Process
 
         public Entity NewInvite(Command command, TransactionContext context)
         {
-            var entity = GetEntityFromState(command.TransactionId);
+            var entity = GetEntityFromState(command);
 
             if (command.Info.InvitePublicKey is null)
                 throw new InvalidTransactionException("Missing invited public key.");
@@ -139,7 +139,7 @@ namespace TransactionProcessor.Process
 
         public Entity CancelInvite(Command command, TransactionContext context)
         {
-            var entity = GetEntityFromState(command.TransactionId);
+            var entity = GetEntityFromState(command);
 
             if (command.Info.InvitePublicKey is null)
                 throw new InvalidTransactionException("Missing invited public key.");
@@ -169,7 +169,7 @@ namespace TransactionProcessor.Process
 
         public Entity RejectInvite(Command command, TransactionContext context)
         {
-            var entity = GetEntityFromState(command.TransactionId);
+            var entity = GetEntityFromState(command);
 
             if (!entity.Final)
                 throw new InvalidTransactionException(_entityNotFinalMessage);
@@ -194,7 +194,7 @@ namespace TransactionProcessor.Process
 
         public Entity AcceptInvite(Command command, TransactionContext context)
         {
-            var entity = GetEntityFromState(command.TransactionId);
+            var entity = GetEntityFromState(command);
             if (!entity.Final)
                 throw new InvalidTransactionException(_entityNotFinalMessage);
 
@@ -234,9 +234,9 @@ namespace TransactionProcessor.Process
 
         //private Dictionary<string, ByteString> GetState(Guid transactionId, TransactionContext context) => context.GetStateAsync(new[] { GetAddress(transactionId) }).Result;
 
-        public Entity GetEntityFromState(Guid transactionId)
+        public Entity GetEntityFromState(Command command)
         {
-            var stateAddress = GetAddress(transactionId);
+            var stateAddress = GetAddress(command.TransactionId, command.CompanyId);
             var response = GetStateHttp(stateAddress);
             if(!response.IsSuccessStatusCode)
                 throw new InvalidTransactionException("Unable to fetch transaction state");
@@ -261,7 +261,7 @@ namespace TransactionProcessor.Process
             return _httpClient.GetAsync(request).Result;
         }
 
-        private string GetAddress(Guid transactionId) => Prefix + transactionId.ToByteArray().ToSha512().TakeLast(32).ToArray().ToHexString();
+        private string GetAddress(Guid transactionId, string companyId) => Prefix + companyId.ToByteArray().ToSha512().ToHexString().Substring(0, 6) + transactionId.ToByteArray().ToSha512().TakeLast(29).ToArray().ToHexString();
 
         private List<Signatory> SignatoriesDeepCopy(List<Signatory> signatories)
         {
@@ -273,11 +273,6 @@ namespace TransactionProcessor.Process
         {
             return events.ConvertAll(e =>
                 new CustomEvent(e.Type, e.JsonContainer, e.TimeStamp));
-        }
-
-        private static Entity UnpackByteString(ByteString byteStringJson)
-        {
-            return JsonConvert.DeserializeObject<Entity>(byteStringJson.ToStringUtf8());
         }
 
         private bool PublicKeyComparison(byte[] key1, byte[] key2)
