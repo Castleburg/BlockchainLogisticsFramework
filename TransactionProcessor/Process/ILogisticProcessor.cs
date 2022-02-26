@@ -1,4 +1,5 @@
-﻿using Sawtooth.Sdk.Processor;
+﻿using System;
+using Sawtooth.Sdk.Processor;
 using SharedObjects.Commands;
 using SharedObjects.Logistic;
 
@@ -13,6 +14,6 @@ namespace TransactionProcessor.Process
         Entity CancelInvite(Command command, TransactionContext context);
         Entity RejectInvite(Command command, TransactionContext context);
         Entity AcceptInvite(Command command, TransactionContext context);
-        Entity GetEntityFromState(Command command, TransactionContext context);
+        Entity GetEntityFromState(Guid transactionId);
     }
 }

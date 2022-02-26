@@ -1,16 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Cryptography;
+using System.Text;
 using Newtonsoft.Json;
 using Sawtooth.Sdk;
+using Sawtooth.Sdk.Processor;
 using SawtoothClient;
 using SawtoothClient.Logistic;
 using SawtoothClient.Objects;
 using SawtoothClient.RideSharing;
 using SawtoothClient.Tools;
+using SharedObjects;
 using SharedObjects.Commands;
 using SharedObjects.Enums;
+using SharedObjects.Logistic;
 using TransactionProcessor;
 using TransactionProcessor.Tools;
 
@@ -21,10 +26,13 @@ namespace ManualTests
         private static string FamilyName = "Test";
         private static string Prefix => FamilyName.ToByteArray().ToSha512().ToHexString().Substring(0, 6);
         private static string GetAddress(Guid transactionId) => Prefix + transactionId.ToByteArray().ToSha512().TakeLast(32).ToArray().ToHexString();
+
+        private static string _clientAddress = "http://192.168.0.106:8008";
+
         private static void Main(string[] args)
         {
             Console.WriteLine("Starting up!");
-            var validatorAddress = "tcp://" + (args.Any() ? args.First() : "192.168.0.106:5050");
+            var validatorAddress = "tcp://" + (args.Any() ? args.First() : "192.168.0.106:4004");
             var clientAddress = "http://" + (args.Any() ? args.First() : "192.168.0.106:8008");
 
             //var processor = new Processor(validatorAddress);
@@ -55,17 +63,14 @@ namespace ManualTests
             //var dec = new RsaDecryptionService();
             //var verified = dec.VerifyToken(token);
 
-            var lc = new LogisticsClient("HelloWorld", publicKey, client, enc);
-            var response = lc.NewEntity(LogisticEnums.EntityType.RideShare);
+            //var lc = new LogisticsClient("HelloWorld", publicKey, client, enc);
+            //var response = lc.NewEntity(LogisticEnums.EntityType.RideShare);
 
 
-
-            //var sc = new SawtoothClient.SawtoothClient(clientAddress, FamilyName, "1.0");
-            //var response = sc.GetState(GetAddress(Guid.Parse("{043ef67c-c80f-447b-a72e-13aff20444c3}")));
-            //var content = response.Content.ReadAsStringAsync().Result;
+            var rep = GetEntityFromState(Guid.Parse("{e17d5486-e93e-46a7-bc4a-8f9cec8cec2d}"));
 
 
-
+            
 
 
             //var rc = new RideShareClient(lc);
@@ -76,5 +81,35 @@ namespace ManualTests
 
             Console.WriteLine("Done!");
         }
+
+        public static Entity GetEntityFromState(Guid transactionId)
+        {
+            var response = GetStateHttp(_clientAddress,
+                GetAddress(transactionId));
+            if (!response.IsSuccessStatusCode)
+                throw new InvalidTransactionException("Unable to fetch transaction state");
+
+            var content = response.Content.ReadAsStringAsync().Result;
+            var encodedString = JsonConvert.DeserializeObject<StateResponse>(content);
+
+            var data = Convert.FromBase64String(encodedString.Data);
+            var decodedString = Encoding.UTF8.GetString(data);
+
+            var state = JsonConvert.DeserializeObject<Entity>(decodedString);
+            return state;
+        }
+
+        private static HttpResponseMessage GetStateHttp(string httpAddress, string stateAddress)
+        {
+            var builder = new StringBuilder();
+            builder.Append(httpAddress);
+            builder.Append("/state/");
+            builder.Append(stateAddress);
+            var request = builder.ToString();
+
+            var httpClient = new HttpClient();
+            return httpClient.GetAsync(request).Result;
+        }
+
     }
 }
