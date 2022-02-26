@@ -152,6 +152,15 @@ namespace SawtoothClient
             return _httpClient.GetAsync(request).Result;
         }
 
+        public HttpResponseMessage GetState(string address)
+        {
+            var builder = new StringBuilder();
+            builder.Append(_address);
+            builder.Append("/state/");
+            builder.Append(address);
+            var request = builder.ToString();
+            return _httpClient.GetAsync(request).Result;
+        }
 
 
     }

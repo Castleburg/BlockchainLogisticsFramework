@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using Newtonsoft.Json;
+using Sawtooth.Sdk;
 using SawtoothClient;
 using SawtoothClient.Logistic;
 using SawtoothClient.Objects;
@@ -17,10 +18,13 @@ namespace ManualTests
 {
     internal class Program
     {
+        private static string FamilyName = "Test";
+        private static string Prefix => FamilyName.ToByteArray().ToSha512().ToHexString().Substring(0, 6);
+        private static string GetAddress(Guid transactionId) => Prefix + transactionId.ToByteArray().ToSha512().TakeLast(32).ToArray().ToHexString();
         private static void Main(string[] args)
         {
             Console.WriteLine("Starting up!");
-            var validatorAddress = "tcp://" + (args.Any() ? args.First() : "192.168.0.106:4004");
+            var validatorAddress = "tcp://" + (args.Any() ? args.First() : "192.168.0.106:5050");
             var clientAddress = "http://" + (args.Any() ? args.First() : "192.168.0.106:8008");
 
             //var processor = new Processor(validatorAddress);
@@ -53,6 +57,16 @@ namespace ManualTests
 
             var lc = new LogisticsClient("HelloWorld", publicKey, client, enc);
             var response = lc.NewEntity(LogisticEnums.EntityType.RideShare);
+
+
+
+            //var sc = new SawtoothClient.SawtoothClient(clientAddress, FamilyName, "1.0");
+            //var response = sc.GetState(GetAddress(Guid.Parse("{043ef67c-c80f-447b-a72e-13aff20444c3}")));
+            //var content = response.Content.ReadAsStringAsync().Result;
+
+
+
+
 
             //var rc = new RideShareClient(lc);
 

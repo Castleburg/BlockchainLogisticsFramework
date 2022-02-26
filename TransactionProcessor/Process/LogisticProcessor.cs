@@ -43,7 +43,6 @@ namespace TransactionProcessor.Process
             if (command.Info.EntityType == LogisticEnums.EntityType.Undefined)
                 throw new InvalidTransactionException("EntityType is undefined.");
 
-            var now = DateTime.Now;
             var entity = new Entity()
             {
                 Type = command.Info.EntityType,
@@ -57,8 +56,8 @@ namespace TransactionProcessor.Process
                     Signatories = new List<Signatory>()
                 },
                 Final = false,
-                CreatedDate = now,
-                LastModified = now
+                CreatedDate = command.TimeStamp,
+                LastModified = command.TimeStamp
             };
             return entity;
         }
@@ -81,6 +80,7 @@ namespace TransactionProcessor.Process
 
             var newEvent = _businessProcess.AddEvent(cEvent, eventsCopy);
 
+            entity.LastModified = command.TimeStamp;
             entity.Events.Add(newEvent);
             return entity;
         }
@@ -99,6 +99,7 @@ namespace TransactionProcessor.Process
             if(!_businessProcess.MakeFinal(eventsCopy))
                 throw new InvalidTransactionException("Entity not eligible to be made final.");
 
+            entity.LastModified = command.TimeStamp;
             entity.Final = true;
             return entity;
         }
@@ -124,6 +125,7 @@ namespace TransactionProcessor.Process
                 CreatedDate = now
             };
 
+            entity.LastModified = command.TimeStamp;
             entity.SignOff.Invites.Add(invite);
             return entity;
         }
@@ -148,6 +150,7 @@ namespace TransactionProcessor.Process
             if (invite.InviteStatus != LogisticEnums.InviteStatus.Pending)
                 throw new InvalidTransactionException(_inviteNotPending);
 
+            entity.LastModified = command.TimeStamp;
             entity.SignOff.Invites.ForEach(x =>
             {
                 if (PublicKeyComparison(x.PublicKey, command.Info.InvitePublicKey))
@@ -172,6 +175,7 @@ namespace TransactionProcessor.Process
             if (invite.InviteStatus != LogisticEnums.InviteStatus.Pending)
                 throw new InvalidTransactionException(_inviteNotPending);
 
+            entity.LastModified = command.TimeStamp;
             entity.SignOff.Invites.ForEach(x =>
             {
                 if (PublicKeyComparison(x.PublicKey, command.PublicKey)){}
@@ -200,6 +204,7 @@ namespace TransactionProcessor.Process
 
             var jsonInviteResponse = _businessProcess.AcceptInvite(command.Info.JsonContainer, signatoriesCopy);
 
+            entity.LastModified = command.TimeStamp;
             entity.SignOff.Invites.ForEach(x =>
             {
                 if (PublicKeyComparison(x.PublicKey, command.PublicKey))
