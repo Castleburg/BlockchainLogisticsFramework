@@ -38,7 +38,7 @@ namespace ManualTests
             //var processor = new Processor(validatorAddress);
             //processor.Run();
 
-            var client = new SawtoothClient.SawtoothClient(clientAddress, "Test", "1.0");
+            var client = new SawtoothClient.SawtoothClient(clientAddress, LogisticEnums.EntityType.RideShare, "1.0");
 
             
 

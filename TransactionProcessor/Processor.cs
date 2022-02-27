@@ -29,7 +29,7 @@ namespace TransactionProcessor
             var cryptoService = new RsaDecryptionService();
 
             var processor = new Sawtooth.Sdk.Processor.TransactionProcessor(_validatorAddress);
-            processor.AddHandler(new LogisticHandler(family, "1.0", logisticProcess, cryptoService));
+            processor.AddHandler(new LogisticHandler(LogisticEnums.EntityType.RideShare, "1.0", logisticProcess, cryptoService));
             processor.Start();
 
             Console.CancelKeyPress += delegate { processor.Stop(); };

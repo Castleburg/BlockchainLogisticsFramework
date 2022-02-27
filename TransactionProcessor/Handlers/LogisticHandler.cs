@@ -26,9 +26,9 @@ namespace TransactionProcessor.Handlers
         private readonly ILogisticProcessor _logisticProcess;
         private readonly ICryptographicService _cryptographicService;
 
-        public LogisticHandler(string familyName, string version, ILogisticProcessor logisticProcess, ICryptographicService cryptographicService)
+        public LogisticHandler(LogisticEnums.EntityType familyName, string version, ILogisticProcessor logisticProcess, ICryptographicService cryptographicService)
         {
-            FamilyName = familyName;
+            FamilyName = familyName.ToString();
             Version = version;
             _logisticProcess = logisticProcess;
             _cryptographicService = cryptographicService;
