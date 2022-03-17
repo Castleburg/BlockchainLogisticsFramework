@@ -126,6 +126,7 @@ namespace ManualTests
             }
             
             Console.WriteLine();
+            Console.ReadLine();
         }
 
 
