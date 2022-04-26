@@ -45,11 +45,11 @@ namespace SawtoothClient
 
         private readonly HttpClient _httpClient;
 
-        public SawtoothClient(string address, LogisticEnums.EntityType familyName, string familyVersion)
+        public SawtoothClient(string address, string familyName, string familyVersion)
         {
             _address = address;
             _httpClient = new HttpClient();
-            _prefix = familyName.ToString().ToByteArray().ToSha512().ToHexString().Substring(0, 6);
+            _prefix = familyName.ToByteArray().ToSha512().ToHexString().Substring(0, 6);
 
             var signer = new Signer();
             var settings = new EncoderSettings()

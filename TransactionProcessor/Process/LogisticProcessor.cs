@@ -43,9 +43,9 @@ namespace TransactionProcessor.Process
 
         public Entity NewEntity(Command command, TransactionContext context)
         {
-            var state = GetEntityFromState(command);
-            if (state is null)
-                throw new InvalidTransactionException("Address already in use.");
+            //var state = GetEntityFromState(command);
+            //if (state is null)
+                //throw new InvalidTransactionException("Address already in use.");
 
             if (command.Info.EntityType == LogisticEnums.EntityType.Undefined)
                 throw new InvalidTransactionException("EntityType is undefined.");
@@ -288,7 +288,7 @@ namespace TransactionProcessor.Process
 
         private bool NotEntityCreator(byte[] publicKey, Entity entity)
         {
-            return PublicKeyComparison(publicKey, entity.PublicKey);
+            return !PublicKeyComparison(publicKey, entity.PublicKey);
         }
     }
 }

@@ -41,7 +41,7 @@ namespace ManualTests
         public static void Demo()
         {
             var validatorAddress = "tcp://localhost:4004";
-            var clientAddress = "http://localhost:8008";
+            var clientAddress = "http://192.168.0.106:8008";
 
             var processor = new Processor(validatorAddress, clientAddress);
             processor.Run();
@@ -55,7 +55,7 @@ namespace ManualTests
             var companyId = "RideSharing Inc.";
 
 
-            var client = new SawtoothClient.SawtoothClient(clientAddress, LogisticEnums.EntityType.RideShare, "1.0");
+            var client = new SawtoothClient.SawtoothClient(clientAddress, FamilyName, "1.0");
             var enc = new RsaEncryptionService(param);
             var logicClient = new LogisticsClient(companyId, publicKey, client, enc);
             var rideClient = new RideShareClient(logicClient);
@@ -64,6 +64,7 @@ namespace ManualTests
             var driverId = "BobsId";
             var passengarId = "AliceId";
 
+            
             var startResponse = rideClient.StartRide(driverId, "Glostrup");
             var transactionId = startResponse.FirstOrDefault().TransactionId;
 
@@ -84,7 +85,7 @@ namespace ManualTests
             var inviteResponse = rideClient.NewInvite(transactionId, publicKey2);
             DisplayEntity(GetEntityFromState(transactionId));
 
-            var client2 = new SawtoothClient.SawtoothClient(clientAddress, LogisticEnums.EntityType.RideShare, "1.0");
+            var client2 = new SawtoothClient.SawtoothClient(clientAddress, FamilyName, "1.0");
             var enc2 = new RsaEncryptionService(param2);
             var logicClient2 = new LogisticsClient("Parking Inc.", publicKey2, client2, enc2);
             var rideClient2 = new RideShareClient(logicClient2);
@@ -132,8 +133,9 @@ namespace ManualTests
 
         public static Entity GetEntityFromState(Guid transactionId)
         {
+            var address = GetAddress(transactionId);
             var response = GetStateHttp(_clientAddress,
-                GetAddress(transactionId));
+                address);
             if (!response.IsSuccessStatusCode)
                 throw new InvalidTransactionException("Unable to fetch transaction state");
 
